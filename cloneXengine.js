@@ -7,6 +7,25 @@ const game = scene.getContext("2d"),
   allComponentData = {};
 
 let id = 0;
+const observe = (obj, key) => {
+  let val = obj[key];
+  Object.defineProperty(obj, key, {
+    get() {
+      return val;
+    },
+    set(newVal) {
+      let a = val,
+        b = newVal;
+      obj._dir = () =>
+        key === "x"
+          ? b > a
+            ? "fromLeft"
+            : "fromRight"
+          : key === "y" && (b > a ? "fromTop" : "fromBottom");
+      val = newVal;
+    }
+  });
+};
 
 class Component {
   constructor(obj) {
@@ -29,6 +48,8 @@ class Component {
       return this;
     };
     renderCommands.push(this.command);
+    observe(this, "x");
+    observe(this, "y");
     id++;
   }
 }
@@ -66,11 +87,11 @@ export const initScene = (xcor, ycor, width, height, obj) => {
 
       const currentComponent = command();
 
-      currentComponent.default && currentComponent.default();
       currentComponent.controls &&
         Object.keys(currentComponent.controls).forEach(e => {
           keyboardVals[e] && currentComponent.controls[e](currentComponent);
         });
+      currentComponent.default && currentComponent.default();
 
       if (currentComponent.bounds) {
         const { [currentComponent.id]: except, ...others } = allComponentData,
@@ -87,61 +108,84 @@ export const initScene = (xcor, ycor, width, height, obj) => {
               othersYPos = otherComponent.bounds.y,
               othersWidth = otherComponent.bounds.w,
               othersHeight = otherComponent.bounds.h;
+            const dir = currentComponent._dir
+                ? currentComponent._dir()
+                : undefined,
+              collisionData = {},
+              alert = () => {
+                currentComponent.onCollision &&
+                  currentComponent.onCollision(otherComponent, collisionData);
+              };
             if (
               exceptYPos < othersYPos + othersHeight &&
               othersYPos < exceptYPos + exceptHeight
             ) {
-              currentComponent.x + currentComponent.w + currentComponent.rv >
-                otherComponent.x &&
-                currentComponent.x + currentComponent.w + currentComponent.rv <
-                  otherComponent.x + otherComponent.w &&
-                (currentComponent.x +=
-                  otherComponent.x - (currentComponent.x + currentComponent.w));
+              if (
+                dir === "fromLeft" &&
+                currentComponent.x < otherComponent.x &&
+                currentComponent.x + currentComponent.w + currentComponent.rv >
+                  otherComponent.x
+              ) {
+                collisionData.fromLeft = true;
+                alert();
+              }
 
-              currentComponent.x - currentComponent.lv <
-                otherComponent.x + otherComponent.w &&
-                currentComponent.x - currentComponent.lv > otherComponent.x &&
-                (currentComponent.x -=
-                  currentComponent.x - (otherComponent.x + otherComponent.w));
+              if (
+                dir === "fromRight" &&
+                currentComponent.x > otherComponent.x &&
+                currentComponent.x - currentComponent.lv <
+                  otherComponent.x + otherComponent.w
+              ) {
+                collisionData.fromRight = true;
+                alert();
+              }
             }
+
             if (
               exceptXPos < othersXPos + othersWidth &&
               othersXPos < exceptXPos + exceptWidth
             ) {
-              currentComponent.y + currentComponent.h + currentComponent.dv >
-                otherComponent.y &&
-                currentComponent.y + currentComponent.h + currentComponent.dv <
-                  otherComponent.y + otherComponent.h &&
-                (currentComponent.y +=
-                  otherComponent.y - (currentComponent.y + currentComponent.h));
+              if (
+                dir === "fromTop" &&
+                currentComponent.y < otherComponent.y &&
+                currentComponent.y + currentComponent.h + currentComponent.dv >
+                  otherComponent.y
+              ) {
+                collisionData.fromTop = true;
+                alert();
+              }
 
-              currentComponent.y - currentComponent.uv <
-                otherComponent.y + otherComponent.h &&
-                currentComponent.y - currentComponent.uv > otherComponent.y &&
-                (currentComponent.y -=
-                  currentComponent.y - (otherComponent.y + otherComponent.h));
+              if (
+                dir === "fromBottom" &&
+                currentComponent.y > otherComponent.y &&
+                currentComponent.y - currentComponent.uv <
+                  otherComponent.y + otherComponent.h
+              ) {
+                collisionData.fromBottom = true;
+                alert();
+              }
             }
 
-            exceptXPos <= othersXPos + othersWidth &&
-              othersXPos <= exceptXPos + exceptWidth &&
-              exceptYPos <= othersYPos + othersHeight &&
-              othersYPos <= exceptYPos + exceptHeight &&
-              (() => {
-                const collisionData = {};
-                exceptXPos + exceptWidth <= othersXPos &&
-                  (collisionData.fromLeft = true);
-                othersXPos + othersWidth <= exceptXPos &&
-                  (collisionData.fromRight = true);
-                exceptYPos + exceptHeight <= othersYPos &&
-                  (collisionData.fromTop = true);
-                othersYPos + othersHeight <= exceptYPos &&
-                  (collisionData.fromBottom = true);
-                currentComponent.onCollision &&
-                  currentComponent.onCollision(otherComponent, collisionData);
-                /**
-                 * Integrate for y axis and sepearate conditions based on directions
-                 */
-              })();
+            // exceptXPos <= othersXPos + othersWidth &&
+            //   othersXPos <= exceptXPos + exceptWidth &&
+            //   exceptYPos <= othersYPos + othersHeight &&
+            //   othersYPos <= exceptYPos + exceptHeight &&
+            //   (() => {
+            //     const collisionData = {};
+            //     exceptXPos + exceptWidth <= othersXPos &&
+            //       (collisionData.fromLeft = true);
+            //     othersXPos + othersWidth <= exceptXPos &&
+            //       (collisionData.fromRight = true);
+            //     exceptYPos + exceptHeight <= othersYPos &&
+            //       (collisionData.fromTop = true);
+            //     othersYPos + othersHeight <= exceptYPos &&
+            //       (collisionData.fromBottom = true);
+            //     currentComponent.onCollision &&
+            //       currentComponent.onCollision(otherComponent, collisionData);
+            //     /**
+            //      * Integrate for y axis and sepearate conditions based on directions
+            //      */
+            //   })();
           } else continue;
         }
       }
@@ -203,7 +247,7 @@ img.setAttribute("src", "./boy.png");
 imgFlipped.setAttribute("src", "./boy-flipped.png");
 
 let isCollidingWithBLock;
-
+let check;
 const redBox = component({
   props: {
     name: "boy",
@@ -213,10 +257,10 @@ const redBox = component({
     y: 20,
     w: 50,
     h: 50,
-    lv: 50,
-    rv: 50,
-    uv: 50,
-    dv: 50,
+    lv: 10,
+    rv: 10,
+    uv: 10,
+    dv: 10,
     gravity: false,
     facingLeft: false,
     moveable: true,
@@ -228,17 +272,14 @@ const redBox = component({
         this.y = 400;
         canJump = true;
       }
-      // else canJump = false;
 
       if (this.x < 10) this.x = 10;
       else if (this.x > 950) this.x = 950;
-      // isCollidingWithBLock && isCollidingWithBLock[1].fromLeft ? this.rv = 0 : this.rv = 10;
-      // isCollidingWithBLock && isCollidingWithBLock[1].fromRight ? this.lv = 0 : this.lv = 10;
       this.bounds.x = this.x;
       this.bounds.y = this.y;
       this.bounds.w = this.w;
       this.bounds.h = this.h;
-      isCollidingWithBLock = undefined;
+      check = [];
     },
     controls: {
       ArrowUp(e) {
@@ -251,7 +292,12 @@ const redBox = component({
         e.x -= e.lv;
       },
       ArrowRight(e) {
-        e.x += e.rv;
+        const [o, d] = check;
+        d
+          ? d.fromLeft
+            ? (e.x += o.x - (e.x + e.w))
+            : (e.x += e.rv)
+          : (e.x += e.rv);
       },
       d(e) {
         if (canFire) {
@@ -264,7 +310,7 @@ const redBox = component({
       }
     },
     onCollision(e, data) {
-      console.log(data);
+      check = [e, data];
     }
   }
 });
