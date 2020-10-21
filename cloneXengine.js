@@ -6,6 +6,7 @@ const game = scene.getContext("2d"),
   renderCommands = [],
   allComponentData = {};
 
+
 let id = 0;
 const observe = (obj, key) => {
   let val = obj[key];
@@ -17,11 +18,11 @@ const observe = (obj, key) => {
       let a = val,
         b = newVal;
       obj._dir = () =>
-        key === "x"
-          ? b > a
-            ? "fromLeft"
-            : "fromRight"
-          : key === "y" && (b > a ? "fromTop" : "fromBottom");
+        key === "x" ?
+        b > a ?
+        "fromLeft" :
+        "fromRight" :
+        key === "y" && (b > a ? "fromTop" : "fromBottom");
       val = newVal;
     }
   });
@@ -48,8 +49,10 @@ class Component {
       return this;
     };
     renderCommands.push(this.command);
-    observe(this, "x");
-    observe(this, "y");
+    if (this.rigidBody) {
+      observe(this, "x");
+      observe(this, "y");
+    }
     id++;
   }
 }
@@ -59,7 +62,8 @@ const remove = component => {
   renderCommands.splice(renderCommands.indexOf(component.command), 1);
 };
 
-const gravity = component => (component.y += component.y / 20);
+let g = 20;
+const gravity = component => (component.y += g);
 
 export const initScene = (xcor, ycor, width, height, obj) => {
   scene.width = width;
@@ -94,12 +98,19 @@ export const initScene = (xcor, ycor, width, height, obj) => {
       currentComponent.default && currentComponent.default();
 
       if (currentComponent.bounds) {
-        const { [currentComponent.id]: except, ...others } = allComponentData,
-          othersArr = Object.keys(others);
+        const {
+          [currentComponent.id]: except, ...others
+        } = allComponentData,
+        othersArr = Object.keys(others);
         for (let e = 0; e < othersArr.length; e++) {
           const otherComponent = others[othersArr[e]];
 
+          const dir = currentComponent._dir ?
+            currentComponent._dir() :
+            undefined;
+            
           if (otherComponent.bounds) {
+
             const exceptXPos = currentComponent.bounds.x,
               exceptYPos = currentComponent.bounds.y,
               exceptWidth = currentComponent.bounds.w,
@@ -108,84 +119,91 @@ export const initScene = (xcor, ycor, width, height, obj) => {
               othersYPos = otherComponent.bounds.y,
               othersWidth = otherComponent.bounds.w,
               othersHeight = otherComponent.bounds.h;
-            const dir = currentComponent._dir
-                ? currentComponent._dir()
-                : undefined,
-              collisionData = {},
-              alert = () => {
-                currentComponent.onCollision &&
-                  currentComponent.onCollision(otherComponent, collisionData);
-              };
-            if (
-              exceptYPos < othersYPos + othersHeight &&
-              othersYPos < exceptYPos + exceptHeight
-            ) {
-              if (
-                dir === "fromLeft" &&
-                currentComponent.x < otherComponent.x &&
-                currentComponent.x + currentComponent.w + currentComponent.rv >
-                  otherComponent.x
-              ) {
-                collisionData.fromLeft = true;
-                alert();
-              }
 
+            if (exceptXPos <= othersXPos + othersWidth &&
+              othersXPos <= exceptXPos + exceptWidth &&
+              exceptYPos <= othersYPos + othersHeight &&
+              othersYPos <= exceptYPos + exceptHeight) {
+
+              currentComponent.onCollision &&
+                currentComponent.onCollision(otherComponent);
+              currentComponent.isColliding = true;
+            } else {
+              currentComponent.isColliding = false;
+              currentComponent.lv = 10;
+              currentComponent.rv = 10;
+              currentComponent.uv = 10;
+              currentComponent.dv = 10;
+              currentComponent.jv = 20;
+              g = 20;
+            }
+
+
+            // alert = () => {
+            //   currentComponent.onCollision &&
+            //     currentComponent.onCollision(otherComponent, collisionData);
+            // };
+            if (currentComponent.rigidBody && currentComponent.moveable) {
               if (
-                dir === "fromRight" &&
-                currentComponent.x > otherComponent.x &&
-                currentComponent.x - currentComponent.lv <
+                exceptYPos < othersYPos + othersHeight &&
+                othersYPos < exceptYPos + exceptHeight
+              ) {
+                if (
+                  dir === "fromLeft" &&
+                  currentComponent.x < otherComponent.x + otherComponent.w &&
+                  currentComponent.x + currentComponent.w + currentComponent.rv > otherComponent.x
+                ) {
+                  // collisionData.fromLeft = true;
+                  currentComponent.x = otherComponent.x - currentComponent.w;
+                  currentComponent.rv = 0;
+                }
+
+                if (
+                  dir === "fromRight" &&
+                  currentComponent.x > otherComponent.x &&
+                  currentComponent.x - currentComponent.lv <
                   otherComponent.x + otherComponent.w
-              ) {
-                collisionData.fromRight = true;
-                alert();
-              }
-            }
-
-            if (
-              exceptXPos < othersXPos + othersWidth &&
-              othersXPos < exceptXPos + exceptWidth
-            ) {
-              if (
-                dir === "fromTop" &&
-                currentComponent.y < otherComponent.y &&
-                currentComponent.y + currentComponent.h + currentComponent.dv >
-                  otherComponent.y
-              ) {
-                collisionData.fromTop = true;
-                alert();
+                ) {
+                  // collisionData.fromRight = true;
+                  currentComponent.x = otherComponent.x + otherComponent.w;
+                  currentComponent.lv = 0;
+                }
               }
 
               if (
-                dir === "fromBottom" &&
-                currentComponent.y > otherComponent.y &&
-                currentComponent.y - currentComponent.uv <
+                exceptXPos < othersXPos + othersWidth &&
+                othersXPos < exceptXPos + exceptWidth
+              ) {
+                if (
+                  dir === "fromTop" &&
+                  currentComponent.y < otherComponent.y + otherComponent.h && 
+                    currentComponent.y + currentComponent.h + currentComponent.dv >
+                    otherComponent.y || currentComponent.y + currentComponent.h + g >
+                    otherComponent.y && currentComponent.y + currentComponent.h + g <
+                    otherComponent.y + otherComponent.w
+                    // needs clean up
+                ) {
+                  // collisionData.fromTop = true;
+                  currentComponent.y = otherComponent.y - currentComponent.h;
+                  currentComponent.dv = 0;//needs clean up for game type, top-down or side scroller
+                  currentComponent.canJump = true;
+                  g = 0;
+                }
+
+                if (
+                  dir === "fromBottom" &&
+                  currentComponent.y > otherComponent.y &&
+                  currentComponent.y - currentComponent.jv <
                   otherComponent.y + otherComponent.h
-              ) {
-                collisionData.fromBottom = true;
-                alert();
+                ) {
+                  // collisionData.fromBottom = true;
+                  currentComponent.y = otherComponent.y + otherComponent.h;
+                  currentComponent.jv = 0;
+                  currentComponent.gravity = true;
+                  // g = 20;
+                }
               }
             }
-
-            // exceptXPos <= othersXPos + othersWidth &&
-            //   othersXPos <= exceptXPos + exceptWidth &&
-            //   exceptYPos <= othersYPos + othersHeight &&
-            //   othersYPos <= exceptYPos + exceptHeight &&
-            //   (() => {
-            //     const collisionData = {};
-            //     exceptXPos + exceptWidth <= othersXPos &&
-            //       (collisionData.fromLeft = true);
-            //     othersXPos + othersWidth <= exceptXPos &&
-            //       (collisionData.fromRight = true);
-            //     exceptYPos + exceptHeight <= othersYPos &&
-            //       (collisionData.fromTop = true);
-            //     othersYPos + othersHeight <= exceptYPos &&
-            //       (collisionData.fromBottom = true);
-            //     currentComponent.onCollision &&
-            //       currentComponent.onCollision(otherComponent, collisionData);
-            //     /**
-            //      * Integrate for y axis and sepearate conditions based on directions
-            //      */
-            //   })();
           } else continue;
         }
       }
@@ -194,7 +212,7 @@ export const initScene = (xcor, ycor, width, height, obj) => {
         currentComponent.y < 0 ||
         currentComponent.x > width ||
         currentComponent.x < 0) &&
-        remove(currentComponent);
+      remove(currentComponent);
     }
     requestAnimationFrame(gameLoop);
   };
@@ -202,6 +220,7 @@ export const initScene = (xcor, ycor, width, height, obj) => {
 };
 
 export const component = obj => new Component(obj);
+
 
 /**--------------
  *
@@ -215,7 +234,7 @@ const fire = e =>
       name: "bullet",
       color: "yellow",
       mass: 1,
-      x: !e.facingLeft ? e.x + 50 : e.x,
+      x: !e.facingLeft ? e.x + 50 : e.x - 10,
       y: e.y + 25,
       w: 10,
       h: 3,
@@ -224,14 +243,14 @@ const fire = e =>
       facingLeft: false
     },
     states: {
-      default() {
+      default () {
         !this.facingLeft ? (this.x += 10) : (this.x -= 10);
         this.bounds.x = this.x;
         this.bounds.y = this.y;
         this.bounds.w = this.w;
         this.bounds.h = this.h;
       },
-      onCollision(e, data) {
+      onCollision(e) {
         e.name !== "bullet" && (e.isHit = true);
         remove(this);
       }
@@ -239,7 +258,6 @@ const fire = e =>
   });
 
 let canFire = true,
-  canJump = false,
   img = document.createElement("img"),
   imgFlipped = document.createElement("img");
 
@@ -261,18 +279,23 @@ const redBox = component({
     rv: 10,
     uv: 10,
     dv: 10,
-    gravity: false,
+    jv: 20,
+    gravity: true,
     facingLeft: false,
     moveable: true,
-    bounds: {}
+    bounds: {},
+    rigidBody: true,
+    isColliding: false,
+    collisionData: {},
+    canJump: false
   },
   states: {
-    default() {
-      if (this.y >= 400 && this.gravity) {
-        this.y = 400;
-        canJump = true;
+    default () {
+      if (this.y >= 700 && this.gravity) {
+        this.gravity = false;
+        this.y = this.y;
+        this.canJump = true;
       }
-
       if (this.x < 10) this.x = 10;
       else if (this.x > 950) this.x = 950;
       this.bounds.x = this.x;
@@ -283,7 +306,7 @@ const redBox = component({
     },
     controls: {
       ArrowUp(e) {
-        e.y -= e.uv;
+        // e.y -= e.uv;
       },
       ArrowDown(e) {
         e.y += e.dv;
@@ -292,12 +315,7 @@ const redBox = component({
         e.x -= e.lv;
       },
       ArrowRight(e) {
-        const [o, d] = check;
-        d
-          ? d.fromLeft
-            ? (e.x += o.x - (e.x + e.w))
-            : (e.x += e.rv)
-          : (e.x += e.rv);
+        e.x += e.rv;
       },
       d(e) {
         if (canFire) {
@@ -309,11 +327,10 @@ const redBox = component({
         }
       }
     },
-    onCollision(e, data) {
-      check = [e, data];
-    }
+    onCollision(e) {}
   }
 });
+
 const onPress = {
   ArrowLeft: true,
   ArrowRight: true,
@@ -328,7 +345,9 @@ Object.keys(onPress).forEach(e => {
     },
     set(newVal) {
       if (!newVal) {
-        const { [e]: except, ...others } = onPress;
+        const {
+          [e]: except, ...others
+        } = onPress;
         Object.keys(others).forEach(i => {
           onPress[i] = true;
         });
@@ -353,18 +372,21 @@ document.addEventListener("keydown", e => {
       break;
     case val === "ArrowUp" && onPress[val]:
       // onPress[val] = false;
-      if (!canJump) return;
-      canJump = false;
+      if (!redBox.canJump) return;
+      redBox.canJump = false;
       let max = 0;
       redBox.gravity = false;
-      const play = setInterval(() => {
+      redBox.jump = () => {
         if (max === 60) {
-          clearInterval(play);
           redBox.gravity = true;
+          console.log(redBox.y)
+          return;
         }
-        redBox.y -= 5;
-        max++;
-      }, 1);
+        redBox.y -= redBox.jv;
+        max+=5;
+        requestAnimationFrame(redBox.jump)
+      }
+      redBox.jump()
       break;
   }
 });
@@ -382,15 +404,16 @@ const enemy = () =>
       isHit: false,
       hitColor: "red",
       normalColor: undefined,
-      r: undefined
+      r: undefined,
+      rigidBody: true
     },
     states: {
-      default() {
-        this.isHit
-          ? (this.color = this.hitColor)
-          : (this.color = this.normalColor);
+      default () {
+        this.isHit ?
+          (this.color = this.hitColor) :
+          (this.color = this.normalColor);
         this.isHit = false;
-        if (this.y >= 400) {
+        if (this.y >= 700) {
           this.r = false;
         } else if (this.y <= 100) {
           this.r = true;
@@ -405,12 +428,12 @@ const enemy = () =>
   });
 // const c1 = enemy();
 // c1.x = 200;
-// c1.y = 200;
+// c1.y = 500;
 // c1.normalColor = 'white';
 // const c2 = enemy();
 // c2.name = 'c2'
 // c2.x = 600;
-// c2.y = 400;
+// c2.y = 700;
 // c2.normalColor = '#00D4FF';
 const block = enemy();
 block.name = "block";
@@ -427,6 +450,6 @@ block.normalColor = "#FFCC00";
 // renderCommands[a] = d;
 // renderCommands[b] = c; //switch id's
 
-initScene(0, 0, 1000, 600, {
+initScene(0, 0, 1000, 790, {
   color: "#4d4d4d"
 });
