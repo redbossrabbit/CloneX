@@ -66,112 +66,44 @@ export const initScene = (xcor, ycor, width, height, obj) => {
     for (let i = 0; i < renderCommands.length; i++) {
 
       const currentComponent = renderCommands[i]();
-      let currentPress = {};
+
       currentComponent.controls &&
-        Object.keys(currentComponent.controls).forEach(e => {//culprit
-          const key = keyboardVals[e];
-          if(key){
-          currentComponent.controls[e](currentComponent);
-          currentPress = {...currentPress, [e]: true};
-          }
+        Object.keys(currentComponent.controls).forEach(e => {
+          keyboardVals[e] && currentComponent.controls[e](currentComponent);
         });
       currentComponent.default && currentComponent.default();
 
-      if (currentComponent.bounds && currentComponent.moveable) {
+      if (currentComponent.active) {
 
         const {
           [currentComponent.id]: except, ...others
         } = allComponentData,
         othersArr = Object.keys(others);
-        // const collidingWith = new Map();
+
         for (let e = 0; e < othersArr.length; e++) {
           const otherComponent = others[othersArr[e]];
 
-          // console.log(dir);
+          if (true) {
+            const exceptXPos = currentComponent.x,
+              exceptYPos = currentComponent.y,
+              exceptWidth = currentComponent.w,
+              exceptHeight = currentComponent.h,
+              othersXPos = otherComponent.x,
+              othersYPos = otherComponent.y,
+              othersWidth = otherComponent.w,
+              othersHeight = otherComponent.h;
 
-          if (otherComponent.bounds) {
-            const exceptXPos = currentComponent.bounds.x,
-              exceptYPos = currentComponent.bounds.y,
-              exceptWidth = currentComponent.bounds.w,
-              exceptHeight = currentComponent.bounds.h,
-              othersXPos = otherComponent.bounds.x,
-              othersYPos = otherComponent.bounds.y,
-              othersWidth = otherComponent.bounds.w,
-              othersHeight = otherComponent.bounds.h;
+            if (exceptXPos < othersXPos + othersWidth &&
+              othersXPos < exceptXPos + exceptWidth &&
+              exceptYPos < othersYPos + othersHeight &&
+              othersYPos < exceptYPos + exceptHeight) {
+
+              currentComponent.onCollision && currentComponent.onCollision(otherComponent);
               
-            if (exceptXPos <= othersXPos + othersWidth &&
-              othersXPos <= exceptXPos + exceptWidth &&
-              exceptYPos <= othersYPos + othersHeight &&
-              othersYPos <= exceptYPos + exceptHeight) {
-
-              // currentComponent.onCollision &&
-              //   currentComponent.onCollision(otherComponent);
-                currentComponent.isColliding = true;
-            } else {
-              currentComponent.isColliding = false;
-            }
-
-
-            // alert = () => {
-            //   currentComponent.onCollision &&
-            //     currentComponent.onCollision(otherComponent, collisionData);
-            // };
-            if (currentComponent.rigidBody) {
-              if (
-                exceptYPos < othersYPos + othersHeight &&
-                othersYPos < exceptYPos + exceptHeight
-              ) {
-                if (
-                  currentPress['ArrowRight'] &&
-                  currentComponent.x < otherComponent.x + otherComponent.w &&
-                  currentComponent.x + currentComponent.w + currentComponent.rv > otherComponent.x
-                ) {
-                  // collisionData.fromLeft = true;
-                  currentComponent.x = otherComponent.x - currentComponent.w;
-                }
-
-                if (
-                  currentPress['ArrowLeft'] &&
-                  currentComponent.x > otherComponent.x &&
-                  currentComponent.x - currentComponent.lv <
-                  otherComponent.x + otherComponent.w
-                ) {
-                  // collisionData.fromRight = true;
-                  currentComponent.x = otherComponent.x + otherComponent.w;
-                }
-              }
-
-              if (
-                exceptXPos < othersXPos + othersWidth &&
-                othersXPos < exceptXPos + exceptWidth
-              ) { 
-                if (
-                  currentPress['ArrowDown'] &&
-                  currentComponent.y < otherComponent.y + otherComponent.h && 
-                    currentComponent.y + currentComponent.h + currentComponent.dv >
-                    otherComponent.y 
-                    // || currentComponent.y + currentComponent.h + g >
-                    // otherComponent.y
-                    // needs clean up
-                ) {
-                  // collisionData.fromTop = true;
-                  currentComponent.y = otherComponent.y - currentComponent.h;//needs clean up for game type, top-down or side scroller
-                  // currentComponent.canJump = true;
-                  // g = 0;
-                }
-
-                if (
-                  currentPress['ArrowUp'] &&
-                  currentComponent.y > otherComponent.y &&
-                  currentComponent.y - currentComponent.uv <
-                  otherComponent.y + otherComponent.h
-                ) {
-                  // collisionData.fromBottom = true;
-                  currentComponent.y = otherComponent.y + otherComponent.h;
-                  // currentComponent.gravity = true;
-                  // g = 20;
-                }
-              }
+              keyboardVals['ArrowRight'] && exceptXPos < othersXPos && (currentComponent.x = othersXPos - exceptWidth);
+              keyboardVals['ArrowLeft'] && exceptXPos + exceptWidth > othersXPos + othersWidth && (currentComponent.x = othersXPos + othersWidth);
+              keyboardVals['ArrowDown'] && exceptYPos < othersYPos && (currentComponent.y = othersYPos - exceptHeight);
+              keyboardVals['ArrowUp'] && exceptYPos + exceptHeight > othersYPos + othersHeight && (currentComponent.y = othersYPos + othersHeight);
             }
           };
         }
@@ -208,17 +140,11 @@ const fire = e =>
       w: 10,
       h: 3,
       gravity: false,
-      bounds: {},
-      facingLeft: false,
-      moveable: true
+      facingLeft: false
     },
     states: {
       default () {
         !this.facingLeft ? (this.x += 10) : (this.x -= 10);
-        this.bounds.x = this.x;
-        this.bounds.y = this.y;
-        this.bounds.w = this.w;
-        this.bounds.h = this.h;
       },
       onCollision(e) {
         e.name !== "bullet" && (e.isHit = true);
@@ -234,8 +160,6 @@ let canFire = true,
 img.setAttribute("src", "./boy.png");
 imgFlipped.setAttribute("src", "./boy-flipped.png");
 
-let isCollidingWithBLock;
-let check;
 const redBox = component({
   props: {
     name: "boy",
@@ -249,30 +173,22 @@ const redBox = component({
     rv: 10,
     uv: 10,
     dv: 10,
-    jv: 20,
     // gravity: true,
     facingLeft: false,
-    moveable: true,
-    bounds: {},
     rigidBody: true,
-    isColliding: false,
     collisionData: {},
-    canJump: false
+    canJump: false,
+    active: true
   },
   states: {
     default () {
-      if (this.y >= 700 && this.gravity) {
-        this.gravity = false;
-        this.y = this.y;
-        this.canJump = true;
-      }
-      if (this.x < 10) this.x = 10;
-      else if (this.x > 950) this.x = 950;
-      this.bounds.x = this.x;
-      this.bounds.y = this.y;
-      this.bounds.w = this.w;
-      this.bounds.h = this.h;
-      check = [];
+      // if (this.y >= 700 && this.gravity) {
+      //   this.gravity = false;
+      //   this.y = this.y;
+      //   this.canJump = true;
+      // }
+      // if (this.x < 10) this.x = 10;
+      // else if (this.x > 950) this.x = 950;
     },
     controls: {
       ArrowUp(e) {
@@ -340,23 +256,23 @@ document.addEventListener("keydown", e => {
       redBox.image = img;
       redBox.facingLeft = false;
       break;
-    // case val === "ArrowUp" && onPress[val]:
-    //   // onPress[val] = false;
-    //   if (!redBox.canJump) return;
-    //   redBox.canJump = false;
-    //   let max = 0;
-    //   redBox.gravity = false;
-    //   redBox.jump = () => {
-    //     if (max === 60) {
-    //       redBox.gravity = true;
-    //       return;
-    //     }
-    //     redBox.y -= redBox.jv;
-    //     max+=5;
-    //     requestAnimationFrame(redBox.jump)
-    //   }
-    //   redBox.jump()
-    //   break;
+      // case val === "ArrowUp" && onPress[val]:
+      //   // onPress[val] = false;
+      //   if (!redBox.canJump) return;
+      //   redBox.canJump = false;
+      //   let max = 0;
+      //   redBox.gravity = false;
+      //   redBox.jump = () => {
+      //     if (max === 60) {
+      //       redBox.gravity = true;
+      //       return;
+      //     }
+      //     redBox.y -= redBox.jv;
+      //     max+=5;
+      //     requestAnimationFrame(redBox.jump)
+      //   }
+      //   redBox.jump()
+      //   break;
   }
 });
 
