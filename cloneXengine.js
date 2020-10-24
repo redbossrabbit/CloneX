@@ -39,8 +39,8 @@ const remove = component => {
   renderCommands.splice(renderCommands.indexOf(component.command), 1);
 };
 
-let g = 20;
-const gravity = component => (component.y += g);
+// let g = 20;
+// const gravity = component => (component.y += g);
 
 export const initScene = (xcor, ycor, width, height, obj) => {
   scene.width = width;
@@ -81,9 +81,9 @@ export const initScene = (xcor, ycor, width, height, obj) => {
         othersArr = Object.keys(others);
 
         for (let e = 0; e < othersArr.length; e++) {
-          const otherComponent = others[othersArr[e]];
 
-          if (true) {
+          const otherComponent = others[othersArr[e]];
+          if (currentComponent.reactsTo[otherComponent.name]) {
             const exceptXPos = currentComponent.x,
               exceptYPos = currentComponent.y,
               exceptWidth = currentComponent.w,
@@ -100,10 +100,12 @@ export const initScene = (xcor, ycor, width, height, obj) => {
 
               currentComponent.onCollision && currentComponent.onCollision(otherComponent);
               
+              if (otherComponent.rigidBody) {
               keyboardVals['ArrowRight'] && exceptXPos < othersXPos && (currentComponent.x = othersXPos - exceptWidth);
               keyboardVals['ArrowLeft'] && exceptXPos + exceptWidth > othersXPos + othersWidth && (currentComponent.x = othersXPos + othersWidth);
               keyboardVals['ArrowDown'] && exceptYPos < othersYPos && (currentComponent.y = othersYPos - exceptHeight);
               keyboardVals['ArrowUp'] && exceptYPos + exceptHeight > othersYPos + othersHeight && (currentComponent.y = othersYPos + othersHeight);
+              }
             }
           };
         }
@@ -139,16 +141,11 @@ const fire = e =>
       y: e.y + 25,
       w: 10,
       h: 3,
-      gravity: false,
-      facingLeft: false
+      facingLeft: false,
     },
     states: {
       default () {
         !this.facingLeft ? (this.x += 10) : (this.x -= 10);
-      },
-      onCollision(e) {
-        e.name !== "bullet" && (e.isHit = true);
-        remove(this);
       }
     }
   });
@@ -175,10 +172,12 @@ const redBox = component({
     dv: 10,
     // gravity: true,
     facingLeft: false,
-    rigidBody: true,
-    collisionData: {},
-    canJump: false,
-    active: true
+    // canJump: false,
+    active: true,
+    reactsTo:{
+      enemy: true
+    }
+
   },
   states: {
     default () {
@@ -279,6 +278,7 @@ document.addEventListener("keydown", e => {
 const enemy = () =>
   component({
     props: {
+      name: 'enemy',
       mass: 10,
       x: undefined,
       y: undefined,
@@ -289,7 +289,12 @@ const enemy = () =>
       isHit: false,
       hitColor: "red",
       normalColor: undefined,
-      r: undefined
+      r: undefined,
+      active: true,
+      reactsTo:{
+        bullet: true
+      },
+      rigidBody: true
     },
     states: {
       default () {
@@ -303,10 +308,10 @@ const enemy = () =>
         //   this.r = true;
         // }
         // this.name !== "block" && (this.r ? (this.y += 5) : (this.y -= 5));
-        this.bounds.x = this.x;
-        this.bounds.y = this.y;
-        this.bounds.w = this.w;
-        this.bounds.h = this.h;
+      },
+      onCollision(e) {
+        e.name === "bullet" && (this.isHit = true);
+        remove(e);
       }
     }
   });
@@ -320,21 +325,18 @@ const enemy = () =>
 // c2.y = 700;
 // c2.normalColor = '#00D4FF';
 const block = enemy();
-block.name = "block";
 block.y = 300;
 block.x = 450;
 block.w = 50;
 block.h = 200;
 block.normalColor = "#FFCC00";
 const block2 = enemy();
-block2.name = "block";
 block2.y = 400;
 block2.x = 600;
 block2.w = 100;
 block2.h = 300;
 block2.normalColor = "#FFCC00";
 const block3 = enemy();
-block3.name = "block2";
 block3.y = 600;
 block3.x = 200;
 block3.w = 100;
