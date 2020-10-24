@@ -8,25 +8,6 @@ const game = scene.getContext("2d"),
 
 
 let id = 0;
-const observe = (obj, key) => {
-  let val = obj[key];
-  Object.defineProperty(obj, key, {
-    get() {
-      return val;
-    },
-    set(newVal) {
-      let a = val,
-        b = newVal;
-      obj._dir = () =>
-        key === "x" ?
-        b > a ?
-        "fromLeft" :
-        "fromRight" :
-        key === "y" && (b > a ? "fromTop" : "fromBottom");
-      val = newVal;
-    }
-  });
-};
 
 class Component {
   constructor(obj) {
@@ -49,10 +30,6 @@ class Component {
       return this;
     };
     renderCommands.push(this.command);
-    if (this.rigidBody) {
-      observe(this, "x");
-      observe(this, "y");
-    }
     id++;
   }
 }
@@ -87,30 +64,32 @@ export const initScene = (xcor, ycor, width, height, obj) => {
     game.fillStyle = obj.color;
     game.fillRect(xcor, ycor, width, height);
     for (let i = 0; i < renderCommands.length; i++) {
-      const command = renderCommands[i];
 
-      const currentComponent = command();
-
+      const currentComponent = renderCommands[i]();
+      let currentPress = {};
       currentComponent.controls &&
-        Object.keys(currentComponent.controls).forEach(e => {
-          keyboardVals[e] && currentComponent.controls[e](currentComponent);
+        Object.keys(currentComponent.controls).forEach(e => {//culprit
+          const key = keyboardVals[e];
+          if(key){
+          currentComponent.controls[e](currentComponent);
+          currentPress = {...currentPress, [e]: true};
+          }
         });
       currentComponent.default && currentComponent.default();
 
-      if (currentComponent.bounds) {
+      if (currentComponent.bounds && currentComponent.moveable) {
+
         const {
           [currentComponent.id]: except, ...others
         } = allComponentData,
         othersArr = Object.keys(others);
+        // const collidingWith = new Map();
         for (let e = 0; e < othersArr.length; e++) {
           const otherComponent = others[othersArr[e]];
 
-          const dir = currentComponent._dir ?
-            currentComponent._dir() :
-            undefined;
-            
-          if (otherComponent.bounds) {
+          // console.log(dir);
 
+          if (otherComponent.bounds) {
             const exceptXPos = currentComponent.bounds.x,
               exceptYPos = currentComponent.bounds.y,
               exceptWidth = currentComponent.bounds.w,
@@ -119,23 +98,17 @@ export const initScene = (xcor, ycor, width, height, obj) => {
               othersYPos = otherComponent.bounds.y,
               othersWidth = otherComponent.bounds.w,
               othersHeight = otherComponent.bounds.h;
-
+              
             if (exceptXPos <= othersXPos + othersWidth &&
               othersXPos <= exceptXPos + exceptWidth &&
               exceptYPos <= othersYPos + othersHeight &&
               othersYPos <= exceptYPos + exceptHeight) {
 
-              currentComponent.onCollision &&
-                currentComponent.onCollision(otherComponent);
-              currentComponent.isColliding = true;
+              // currentComponent.onCollision &&
+              //   currentComponent.onCollision(otherComponent);
+                currentComponent.isColliding = true;
             } else {
               currentComponent.isColliding = false;
-              currentComponent.lv = 10;
-              currentComponent.rv = 10;
-              currentComponent.uv = 10;
-              currentComponent.dv = 10;
-              currentComponent.jv = 20;
-              g = 20;
             }
 
 
@@ -143,68 +116,64 @@ export const initScene = (xcor, ycor, width, height, obj) => {
             //   currentComponent.onCollision &&
             //     currentComponent.onCollision(otherComponent, collisionData);
             // };
-            if (currentComponent.rigidBody && currentComponent.moveable) {
+            if (currentComponent.rigidBody) {
               if (
                 exceptYPos < othersYPos + othersHeight &&
                 othersYPos < exceptYPos + exceptHeight
               ) {
                 if (
-                  dir === "fromLeft" &&
+                  currentPress['ArrowRight'] &&
                   currentComponent.x < otherComponent.x + otherComponent.w &&
                   currentComponent.x + currentComponent.w + currentComponent.rv > otherComponent.x
                 ) {
                   // collisionData.fromLeft = true;
                   currentComponent.x = otherComponent.x - currentComponent.w;
-                  currentComponent.rv = 0;
                 }
 
                 if (
-                  dir === "fromRight" &&
+                  currentPress['ArrowLeft'] &&
                   currentComponent.x > otherComponent.x &&
                   currentComponent.x - currentComponent.lv <
                   otherComponent.x + otherComponent.w
                 ) {
                   // collisionData.fromRight = true;
                   currentComponent.x = otherComponent.x + otherComponent.w;
-                  currentComponent.lv = 0;
                 }
               }
 
               if (
                 exceptXPos < othersXPos + othersWidth &&
                 othersXPos < exceptXPos + exceptWidth
-              ) {
+              ) { 
                 if (
-                  dir === "fromTop" &&
+                  currentPress['ArrowDown'] &&
                   currentComponent.y < otherComponent.y + otherComponent.h && 
                     currentComponent.y + currentComponent.h + currentComponent.dv >
-                    otherComponent.y || currentComponent.y + currentComponent.h + g >
-                    otherComponent.y && currentComponent.y + currentComponent.h + g <
-                    otherComponent.y + otherComponent.w
+                    otherComponent.y 
+                    // || currentComponent.y + currentComponent.h + g >
+                    // otherComponent.y
                     // needs clean up
                 ) {
                   // collisionData.fromTop = true;
-                  currentComponent.y = otherComponent.y - currentComponent.h;
-                  currentComponent.dv = 0;//needs clean up for game type, top-down or side scroller
-                  currentComponent.canJump = true;
-                  g = 0;
+                  currentComponent.y = otherComponent.y - currentComponent.h;//needs clean up for game type, top-down or side scroller
+                  // currentComponent.canJump = true;
+                  // g = 0;
                 }
 
                 if (
-                  dir === "fromBottom" &&
+                  currentPress['ArrowUp'] &&
                   currentComponent.y > otherComponent.y &&
-                  currentComponent.y - currentComponent.jv <
+                  currentComponent.y - currentComponent.uv <
                   otherComponent.y + otherComponent.h
                 ) {
                   // collisionData.fromBottom = true;
                   currentComponent.y = otherComponent.y + otherComponent.h;
-                  currentComponent.jv = 0;
-                  currentComponent.gravity = true;
+                  // currentComponent.gravity = true;
                   // g = 20;
                 }
               }
             }
-          } else continue;
+          };
         }
       }
       currentComponent.gravity && gravity(currentComponent);
@@ -240,7 +209,8 @@ const fire = e =>
       h: 3,
       gravity: false,
       bounds: {},
-      facingLeft: false
+      facingLeft: false,
+      moveable: true
     },
     states: {
       default () {
@@ -280,7 +250,7 @@ const redBox = component({
     uv: 10,
     dv: 10,
     jv: 20,
-    gravity: true,
+    // gravity: true,
     facingLeft: false,
     moveable: true,
     bounds: {},
@@ -306,7 +276,7 @@ const redBox = component({
     },
     controls: {
       ArrowUp(e) {
-        // e.y -= e.uv;
+        e.y -= e.uv;
       },
       ArrowDown(e) {
         e.y += e.dv;
@@ -370,24 +340,23 @@ document.addEventListener("keydown", e => {
       redBox.image = img;
       redBox.facingLeft = false;
       break;
-    case val === "ArrowUp" && onPress[val]:
-      // onPress[val] = false;
-      if (!redBox.canJump) return;
-      redBox.canJump = false;
-      let max = 0;
-      redBox.gravity = false;
-      redBox.jump = () => {
-        if (max === 60) {
-          redBox.gravity = true;
-          console.log(redBox.y)
-          return;
-        }
-        redBox.y -= redBox.jv;
-        max+=5;
-        requestAnimationFrame(redBox.jump)
-      }
-      redBox.jump()
-      break;
+    // case val === "ArrowUp" && onPress[val]:
+    //   // onPress[val] = false;
+    //   if (!redBox.canJump) return;
+    //   redBox.canJump = false;
+    //   let max = 0;
+    //   redBox.gravity = false;
+    //   redBox.jump = () => {
+    //     if (max === 60) {
+    //       redBox.gravity = true;
+    //       return;
+    //     }
+    //     redBox.y -= redBox.jv;
+    //     max+=5;
+    //     requestAnimationFrame(redBox.jump)
+    //   }
+    //   redBox.jump()
+    //   break;
   }
 });
 
@@ -404,8 +373,7 @@ const enemy = () =>
       isHit: false,
       hitColor: "red",
       normalColor: undefined,
-      r: undefined,
-      rigidBody: true
+      r: undefined
     },
     states: {
       default () {
@@ -413,12 +381,12 @@ const enemy = () =>
           (this.color = this.hitColor) :
           (this.color = this.normalColor);
         this.isHit = false;
-        if (this.y >= 700) {
-          this.r = false;
-        } else if (this.y <= 100) {
-          this.r = true;
-        }
-        this.name !== "block" && (this.r ? (this.y += 5) : (this.y -= 5));
+        // if (this.y >= 700) {
+        //   this.r = false;
+        // } else if (this.y <= 100) {
+        //   this.r = true;
+        // }
+        // this.name !== "block" && (this.r ? (this.y += 5) : (this.y -= 5));
         this.bounds.x = this.x;
         this.bounds.y = this.y;
         this.bounds.w = this.w;
@@ -437,11 +405,25 @@ const enemy = () =>
 // c2.normalColor = '#00D4FF';
 const block = enemy();
 block.name = "block";
-block.y = 400;
-block.x = 400;
-block.w = 100;
-block.h = 100;
+block.y = 300;
+block.x = 450;
+block.w = 50;
+block.h = 200;
 block.normalColor = "#FFCC00";
+const block2 = enemy();
+block2.name = "block";
+block2.y = 400;
+block2.x = 600;
+block2.w = 100;
+block2.h = 300;
+block2.normalColor = "#FFCC00";
+const block3 = enemy();
+block3.name = "block2";
+block3.y = 600;
+block3.x = 200;
+block3.w = 100;
+block3.h = 50;
+block3.normalColor = "#FFCC00";
 
 // const a = redBox.id,
 //     b = c2.id,
