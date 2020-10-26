@@ -19,6 +19,7 @@ class Component {
     }
 
     this.id = id;
+
     allComponentData[id] = this;
     this.command = () => {
       this.color &&
@@ -29,6 +30,13 @@ class Component {
       this.image && game.drawImage(this.image, this.x, this.y, 50, 50);
       return this;
     };
+    // this.playAnimation = e => {
+    //   this.imgX = 0;
+    //   this.imgY = this.animations.cellHeight * e[1];
+    //   for (let i = 0; i < e[2]; i++) {
+    //     this.imgX += this.animations.cellWidth;
+    //   }
+    // }
     renderCommands.push(this.command);
     id++;
   }
@@ -39,8 +47,8 @@ const remove = component => {
   renderCommands.splice(renderCommands.indexOf(component.command), 1);
 };
 
-// let g = 20;
-// const gravity = component => (component.y += g);
+let g = 20;
+const gravity = component => (component.y += g);
 
 export const initScene = (xcor, ycor, width, height, obj) => {
   scene.width = width;
@@ -83,7 +91,9 @@ export const initScene = (xcor, ycor, width, height, obj) => {
         for (let e = 0; e < othersArr.length; e++) {
 
           const otherComponent = others[othersArr[e]];
+
           if (currentComponent.reactsTo[otherComponent.name]) {
+
             const exceptXPos = currentComponent.x,
               exceptYPos = currentComponent.y,
               exceptWidth = currentComponent.w,
@@ -98,15 +108,43 @@ export const initScene = (xcor, ycor, width, height, obj) => {
               exceptYPos < othersYPos + othersHeight &&
               othersYPos < exceptYPos + exceptHeight) {
 
-              currentComponent.onCollision && currentComponent.onCollision(otherComponent);
-              
               if (otherComponent.rigidBody) {
-              keyboardVals['ArrowRight'] && exceptXPos < othersXPos && (currentComponent.x = othersXPos - exceptWidth);
-              keyboardVals['ArrowLeft'] && exceptXPos + exceptWidth > othersXPos + othersWidth && (currentComponent.x = othersXPos + othersWidth);
-              keyboardVals['ArrowDown'] && exceptYPos < othersYPos && (currentComponent.y = othersYPos - exceptHeight);
-              keyboardVals['ArrowUp'] && exceptYPos + exceptHeight > othersYPos + othersHeight && (currentComponent.y = othersYPos + othersHeight);
+                
+                if (exceptXPos < othersXPos) {
+                  if (exceptYPos < othersYPos) {
+                    if (exceptXPos + exceptWidth - othersXPos < exceptYPos + exceptHeight - othersYPos) {
+                      currentComponent.x = othersXPos - exceptWidth;
+                    } else {
+                      currentComponent.y = othersYPos - exceptHeight;
+                    }
+                  } else {
+                    if (exceptXPos + exceptWidth - othersXPos < othersYPos + othersHeight - exceptYPos) {
+                      currentComponent.x = othersXPos - exceptWidth;
+                    } else {
+                      currentComponent.y = othersYPos + othersHeight;
+                    }
+                  }
+                } else {
+                  if (exceptYPos < othersYPos) {
+                    if (othersXPos + othersWidth - exceptXPos < exceptYPos + exceptHeight - othersYPos) {
+                      currentComponent.x = othersXPos + othersWidth;
+                    } else {
+                      currentComponent.y = othersYPos - exceptHeight;
+                    }
+                  } else {
+                    if (othersXPos + othersWidth - exceptXPos < othersYPos + othersHeight - exceptYPos) {
+                      currentComponent.x = othersXPos + othersWidth;
+                    } else {
+                      currentComponent.y = othersYPos + othersHeight;
+                    }
+                  }
+                }
               }
+
+              currentComponent.onCollision && currentComponent.onCollision(otherComponent);
+
             }
+
           };
         }
       }
@@ -160,8 +198,8 @@ imgFlipped.setAttribute("src", "./boy-flipped.png");
 const redBox = component({
   props: {
     name: "boy",
-    image: img,
     mass: 10,
+    image: img,
     x: 40,
     y: 20,
     w: 50,
@@ -170,11 +208,21 @@ const redBox = component({
     rv: 10,
     uv: 10,
     dv: 10,
+    // animations: {
+    //   spriteSheet: img,
+    //   cellHeight: 50,
+    //   cellwidth: 50
+    // },
+    // leftAnim: [2, 3],
+    // rightAnim: [3, 3],
+    // upAnim: [1, 3],
+    // downAnim: [0, 3],
+    // leftAnim: [],
     // gravity: true,
     facingLeft: false,
     // canJump: false,
     active: true,
-    reactsTo:{
+    reactsTo: {
       enemy: true
     }
 
@@ -197,6 +245,7 @@ const redBox = component({
         e.y += e.dv;
       },
       ArrowLeft(e) {
+
         e.x -= e.lv;
       },
       ArrowRight(e) {
@@ -274,7 +323,9 @@ document.addEventListener("keydown", e => {
       //   break;
   }
 });
-
+/**
+ * @param 
+ */
 const enemy = () =>
   component({
     props: {
@@ -291,7 +342,7 @@ const enemy = () =>
       normalColor: undefined,
       r: undefined,
       active: true,
-      reactsTo:{
+      reactsTo: {
         bullet: true
       },
       rigidBody: true
