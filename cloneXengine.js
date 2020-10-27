@@ -8,7 +8,10 @@ const game = scene.getContext("2d"),
 
 
 let id = 0;
-
+let frame = 0,
+  updateTime = 0,
+  animData = {};
+  
 class Component {
   constructor(obj) {
     for (const key in obj.props) {
@@ -19,7 +22,19 @@ class Component {
     }
 
     this.id = id;
-
+    this.animations && (this.play = () => {
+      if (updateTime === 10) {
+        updateTime = 0;
+        if (frame === animData.limit) {
+          this.animations.y = this.animations.cellHeight * animData.origin;
+          this.animations.x = 0;
+          frame = 0;
+        }
+        this.animations.x += this.animations.cellWidth;
+        frame++;
+      }
+      updateTime++;
+    })
     allComponentData[id] = this;
     this.command = () => {
       this.color &&
@@ -27,7 +42,10 @@ class Component {
           game.fillStyle = this.color;
           game.fillRect(this.x, this.y, this.w, this.h);
         })();
-      this.image && game.drawImage(this.image, this.x, this.y, 50, 50);
+      if (this.animations) {
+        game.drawImage(this.animations.image, this.animations.x, this.animations.y, this.animations.cellWidth, this.animations.cellHeight, this.x, this.y, this.animations.size, this.animations.size);
+        this.play()
+      }
       return this;
     };
     // this.playAnimation = e => {
@@ -109,7 +127,7 @@ export const initScene = (xcor, ycor, width, height, obj) => {
               othersYPos < exceptYPos + exceptHeight) {
 
               if (otherComponent.rigidBody) {
-                
+
                 if (exceptXPos < othersXPos) {
                   if (exceptYPos < othersYPos) {
                     if (exceptXPos + exceptWidth - othersXPos < exceptYPos + exceptHeight - othersYPos) {
@@ -163,6 +181,15 @@ export const initScene = (xcor, ycor, width, height, obj) => {
 export const component = obj => new Component(obj);
 
 
+const animate = (obj, anim) => {
+  frame = 0;
+  updateTime = 0;
+
+  animData.origin = obj.animations[anim][0];
+  animData.limit = obj.animations[anim][1];
+  obj.animations.y = obj.animations.cellHeight * animData.origin;
+}
+
 /**--------------
  *
  * TEST AREA
@@ -192,22 +219,31 @@ let canFire = true,
   img = document.createElement("img"),
   imgFlipped = document.createElement("img");
 
-img.setAttribute("src", "./boy.png");
+img.setAttribute("src", "./sprite-sheet.png");
 imgFlipped.setAttribute("src", "./boy-flipped.png");
 
 const redBox = component({
   props: {
     name: "boy",
     mass: 10,
-    image: img,
+    animations: {
+      image: img,
+      size: 50,
+      x: 0,
+      y: 0,
+      cellWidth: 400,
+      cellHeight: 450,
+      downAnim: [0, 3],
+      rightAnim: [3, 3]
+    },
     x: 40,
     y: 20,
     w: 50,
     h: 50,
-    lv: 10,
-    rv: 10,
-    uv: 10,
-    dv: 10,
+    lv: 5,
+    rv: 5,
+    uv: 5,
+    dv: 5,
     // animations: {
     //   spriteSheet: img,
     //   cellHeight: 50,
@@ -268,7 +304,8 @@ const redBox = component({
 const onPress = {
   ArrowLeft: true,
   ArrowRight: true,
-  ArrowUp: true
+  ArrowUp: true,
+  ArrowDown: true,
 };
 
 Object.keys(onPress).forEach(e => {
@@ -294,15 +331,22 @@ Object.keys(onPress).forEach(e => {
 document.addEventListener("keydown", e => {
   const val = e.key;
   switch (true) {
-    case val === "ArrowLeft" && onPress[val]:
-      onPress[val] = false;
-      redBox.image = imgFlipped;
-      redBox.facingLeft = true;
-      break;
+    // case val === "ArrowLeft" && onPress[val]:
+    //   onPress[val] = false;
+    //   redBox.image = imgFlipped;
+    //   redBox.facingLeft = true;
+    //   break;
     case val === "ArrowRight" && onPress[val]:
       onPress[val] = false;
-      redBox.image = img;
-      redBox.facingLeft = false;
+      animate(redBox, 'rightAnim');
+      // redBox.image = img;
+      // redBox.facingLeft = false;
+      break;
+    case val === "ArrowDown" && onPress[val]:
+      onPress[val] = false;
+      animate(redBox, 'downAnim');
+      // redBox.image = img;
+      // redBox.facingLeft = false;
       break;
       // case val === "ArrowUp" && onPress[val]:
       //   // onPress[val] = false;
