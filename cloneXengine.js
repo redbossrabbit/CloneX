@@ -22,6 +22,7 @@ class Component {
     }
 
     this.id = id;
+
     this.animations && (this.play = () => {
       if (updateTime === 10) {
         updateTime = 0;
@@ -35,7 +36,9 @@ class Component {
       }
       updateTime++;
     })
+
     allComponentData[id] = this;
+
     this.command = () => {
       this.color &&
         (() => {
@@ -43,8 +46,8 @@ class Component {
           game.fillRect(this.x, this.y, this.w, this.h);
         })();
       if (this.animations) {
-        game.drawImage(this.animations.image, this.animations.x, this.animations.y, this.animations.cellWidth, this.animations.cellHeight, this.x, this.y, this.animations.size, this.animations.size);
-        this.play()
+        game.drawImage(this.animations.image, this.animations.x , this.animations.y, this.animations.cellWidth, this.animations.cellHeight, this.x, this.y, this.animations.size, this.animations.size);
+        this.play();
       }
       return this;
     };
@@ -71,6 +74,7 @@ const gravity = component => (component.y += g);
 export const initScene = (xcor, ycor, width, height, obj) => {
   scene.width = width;
   scene.height = height;
+
   window.addEventListener(
     "keydown",
     e => {
@@ -85,6 +89,7 @@ export const initScene = (xcor, ycor, width, height, obj) => {
     },
     true
   );
+
   const gameLoop = () => {
     game.clearRect(xcor, ycor, obj.w || width, obj.h || height);
     game.fillStyle = obj.color;
@@ -188,6 +193,7 @@ const animate = (obj, anim) => {
   animData.origin = obj.animations[anim][0];
   animData.limit = obj.animations[anim][1];
   obj.animations.y = obj.animations.cellHeight * animData.origin;
+  obj.animations.x = 0;
 }
 
 /**--------------
@@ -234,7 +240,9 @@ const redBox = component({
       cellWidth: 400,
       cellHeight: 450,
       downAnim: [0, 3],
-      rightAnim: [3, 3]
+      rightAnim: [3, 3],
+      leftAnim: [2, 3],
+      upAnim: [1, 3],
     },
     x: 40,
     y: 20,
@@ -331,11 +339,12 @@ Object.keys(onPress).forEach(e => {
 document.addEventListener("keydown", e => {
   const val = e.key;
   switch (true) {
-    // case val === "ArrowLeft" && onPress[val]:
-    //   onPress[val] = false;
-    //   redBox.image = imgFlipped;
-    //   redBox.facingLeft = true;
-    //   break;
+    case val === "ArrowLeft" && onPress[val]:
+      onPress[val] = false;
+      animate(redBox, 'leftAnim');
+      // redBox.image = imgFlipped;
+      // redBox.facingLeft = true;
+      break;
     case val === "ArrowRight" && onPress[val]:
       onPress[val] = false;
       animate(redBox, 'rightAnim');
@@ -345,6 +354,12 @@ document.addEventListener("keydown", e => {
     case val === "ArrowDown" && onPress[val]:
       onPress[val] = false;
       animate(redBox, 'downAnim');
+      // redBox.image = img;
+      // redBox.facingLeft = false;
+      break;
+    case val === "ArrowUp" && onPress[val]:
+      onPress[val] = false;
+      animate(redBox, 'upAnim');
       // redBox.image = img;
       // redBox.facingLeft = false;
       break;
@@ -383,7 +398,7 @@ const enemy = () =>
       bounds: {},
       isHit: false,
       hitColor: "red",
-      normalColor: undefined,
+      normalColor: "yellow",
       r: undefined,
       active: true,
       reactsTo: {
@@ -424,19 +439,21 @@ block.y = 300;
 block.x = 450;
 block.w = 50;
 block.h = 200;
-block.normalColor = "#FFCC00";
 const block2 = enemy();
 block2.y = 400;
 block2.x = 600;
 block2.w = 100;
 block2.h = 300;
-block2.normalColor = "#FFCC00";
 const block3 = enemy();
 block3.y = 600;
 block3.x = 200;
 block3.w = 100;
 block3.h = 50;
-block3.normalColor = "#FFCC00";
+const block4 = enemy();
+block4.y = 100;
+block4.x = 200;
+block4.w = 100;
+block4.h = 50;
 
 // const a = redBox.id,
 //     b = c2.id,
@@ -446,5 +463,5 @@ block3.normalColor = "#FFCC00";
 // renderCommands[b] = c; //switch id's
 
 initScene(0, 0, 1000, 790, {
-  color: "#4d4d4d"
+  color: "grey"
 });
