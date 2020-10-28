@@ -8,10 +8,7 @@ const game = scene.getContext("2d"),
 
 
 let id = 0;
-let frame = 0,
-  updateTime = 0,
-  animData = {};
-  
+
 class Component {
   constructor(obj) {
     for (const key in obj.props) {
@@ -23,49 +20,67 @@ class Component {
 
     this.id = id;
 
-    this.animations && (this.play = () => {
-      if (updateTime === 10) {
-        updateTime = 0;
-        if (frame === animData.limit) {
-          this.animations.y = this.animations.cellHeight * animData.origin;
-          this.animations.x = 0;
-          frame = 0;
+    if (this.animations) {
+
+      this.frame = 0;
+      this.updateTime = 0;
+      this.animData = {};
+      
+      //Preload Image
+      const img = document.createElement("img");
+      img.setAttribute("src", this.animations.spriteSheet);
+      this.animations.spriteSheet = img;
+
+      //Animation player
+      this.play = () => {
+        if (this.updateTime === this.animations.speed) {
+          this.updateTime = 0;
+          if (this.frame === this.animData.limit) {
+            this.animations.y = this.animations.frameHeight * this.animData.origin;
+            this.animations.x = 0;
+            this.frame = 0;
+          }
+          this.animations.x += this.animations.frameWidth;
+          this.frame++;
         }
-        this.animations.x += this.animations.cellWidth;
-        frame++;
+        this.updateTime++;
       }
-      updateTime++;
-    })
+
+      //animate function to be called externally
+      this.animate = (anim) => {
+        this.frame = 0;
+        this.updateTime = 0;
+
+        this.animData.origin = this.animations[anim][0];
+        this.animData.limit = this.animations[anim][1];
+        this.animations.y = this.animations.frameHeight * this.animData.origin;
+        this.animations.x = 0;
+      }
+    }
 
     allComponentData[id] = this;
 
-    this.command = () => {
+    this.render = () => {
       this.color &&
         (() => {
           game.fillStyle = this.color;
           game.fillRect(this.x, this.y, this.w, this.h);
         })();
+        
       if (this.animations) {
-        game.drawImage(this.animations.image, this.animations.x , this.animations.y, this.animations.cellWidth, this.animations.cellHeight, this.x, this.y, this.animations.size, this.animations.size);
+        game.drawImage(this.animations.spriteSheet, this.animations.x, this.animations.y, this.animations.frameWidth, this.animations.frameHeight, this.x, this.y, this.animations.imageSizeX, this.animations.imageSizeY);
         this.play();
       }
       return this;
     };
-    // this.playAnimation = e => {
-    //   this.imgX = 0;
-    //   this.imgY = this.animations.cellHeight * e[1];
-    //   for (let i = 0; i < e[2]; i++) {
-    //     this.imgX += this.animations.cellWidth;
-    //   }
-    // }
-    renderCommands.push(this.command);
+    renderCommands.push(this.render);
     id++;
   }
 }
 
 const remove = component => {
   delete allComponentData[component.id];
-  renderCommands.splice(renderCommands.indexOf(component.command), 1);
+  renderCommands.splice(renderCommands.indexOf(component.render), 1);
 };
 
 let g = 20;
@@ -104,7 +119,7 @@ export const initScene = (xcor, ycor, width, height, obj) => {
         });
       currentComponent.default && currentComponent.default();
 
-      if (currentComponent.active) {
+      if (currentComponent.canCollide) {
 
         const {
           [currentComponent.id]: except, ...others
@@ -167,7 +182,6 @@ export const initScene = (xcor, ycor, width, height, obj) => {
               currentComponent.onCollision && currentComponent.onCollision(otherComponent);
 
             }
-
           };
         }
       }
@@ -184,17 +198,6 @@ export const initScene = (xcor, ycor, width, height, obj) => {
 };
 
 export const component = obj => new Component(obj);
-
-
-const animate = (obj, anim) => {
-  frame = 0;
-  updateTime = 0;
-
-  animData.origin = obj.animations[anim][0];
-  animData.limit = obj.animations[anim][1];
-  obj.animations.y = obj.animations.cellHeight * animData.origin;
-  obj.animations.x = 0;
-}
 
 /**--------------
  *
@@ -221,29 +224,12 @@ const fire = e =>
     }
   });
 
-let canFire = true,
-  img = document.createElement("img"),
-  imgFlipped = document.createElement("img");
-
-img.setAttribute("src", "./sprite-sheet.png");
-imgFlipped.setAttribute("src", "./boy-flipped.png");
+let canFire = true;
 
 const redBox = component({
   props: {
     name: "boy",
     mass: 10,
-    animations: {
-      image: img,
-      size: 50,
-      x: 0,
-      y: 0,
-      cellWidth: 400,
-      cellHeight: 450,
-      downAnim: [0, 3],
-      rightAnim: [3, 3],
-      leftAnim: [2, 3],
-      upAnim: [1, 3],
-    },
     x: 40,
     y: 20,
     w: 50,
@@ -252,24 +238,26 @@ const redBox = component({
     rv: 5,
     uv: 5,
     dv: 5,
-    // animations: {
-    //   spriteSheet: img,
-    //   cellHeight: 50,
-    //   cellwidth: 50
-    // },
-    // leftAnim: [2, 3],
-    // rightAnim: [3, 3],
-    // upAnim: [1, 3],
-    // downAnim: [0, 3],
-    // leftAnim: [],
-    // gravity: true,
     facingLeft: false,
     // canJump: false,
-    active: true,
+    canCollide: true,
     reactsTo: {
       enemy: true
-    }
+    },
+    animations: {
+      spriteSheet: "./sprite-sheet.png",
+      imageSizeX: 50,
+      imageSizeY: 50,
+      speed: 10,
+      frameWidth: 400,
+      frameHeight: 450,
 
+      //animations
+      downAnim: [0, 3],
+      rightAnim: [3, 3],
+      leftAnim: [2, 3],
+      upAnim: [1, 3]
+    },
   },
   states: {
     default () {
@@ -289,7 +277,6 @@ const redBox = component({
         e.y += e.dv;
       },
       ArrowLeft(e) {
-
         e.x -= e.lv;
       },
       ArrowRight(e) {
@@ -323,10 +310,12 @@ Object.keys(onPress).forEach(e => {
       return val;
     },
     set(newVal) {
+
       if (!newVal) {
         const {
           [e]: except, ...others
         } = onPress;
+
         Object.keys(others).forEach(i => {
           onPress[i] = true;
         });
@@ -337,31 +326,25 @@ Object.keys(onPress).forEach(e => {
 });
 
 document.addEventListener("keydown", e => {
+
   const val = e.key;
+
   switch (true) {
     case val === "ArrowLeft" && onPress[val]:
       onPress[val] = false;
-      animate(redBox, 'leftAnim');
-      // redBox.image = imgFlipped;
-      // redBox.facingLeft = true;
+      redBox.animate('leftAnim');
       break;
     case val === "ArrowRight" && onPress[val]:
       onPress[val] = false;
-      animate(redBox, 'rightAnim');
-      // redBox.image = img;
-      // redBox.facingLeft = false;
+      redBox.animate('rightAnim');
       break;
     case val === "ArrowDown" && onPress[val]:
       onPress[val] = false;
-      animate(redBox, 'downAnim');
-      // redBox.image = img;
-      // redBox.facingLeft = false;
+      redBox.animate('downAnim');
       break;
     case val === "ArrowUp" && onPress[val]:
       onPress[val] = false;
-      animate(redBox, 'upAnim');
-      // redBox.image = img;
-      // redBox.facingLeft = false;
+      redBox.animate('upAnim');
       break;
       // case val === "ArrowUp" && onPress[val]:
       //   // onPress[val] = false;
@@ -400,7 +383,7 @@ const enemy = () =>
       hitColor: "red",
       normalColor: "yellow",
       r: undefined,
-      active: true,
+      canCollide: true,
       reactsTo: {
         bullet: true
       },
