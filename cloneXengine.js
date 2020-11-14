@@ -245,7 +245,7 @@ const redBox = component({
       enemy: true
     },
     animations: {
-      spriteSheet: "./sprite-sheet.png",
+      spriteSheet: "./assets/img/sprite-sheet.png",
       imageSizeX: 50,
       imageSizeY: 50,
       speed: 10,
