@@ -1,11 +1,59 @@
 const scene = document.createElement("canvas");
 document.body.append(scene);
-
+const frameRateTxt = document.getElementById('frame-rate');
 const game = scene.getContext("2d"),
   keyboardVals = {},
   renderCommands = [],
   allComponentData = {};
 
+const PI = Math.PI;
+
+const lineProps = {
+  x: 600,
+  y: 250,
+  h: 200,
+  d: 50
+};
+
+let frame = 0;
+setInterval(() => {
+  frameRateTxt.innerText =`${frame}fps`;
+  frame = 0;
+}, 1000);
+
+let newX = lineProps.h * Math.sin(PI * lineProps.d / 180),
+  newY = newX * Math.tan(PI * (90 - lineProps.d) / 180);
+
+
+
+const drawLine = () => {
+  const x = lineProps.x + newX;
+  const y = lineProps.y - newY;
+  game.beginPath();
+  game.moveTo(lineProps.x, lineProps.y);
+  game.lineTo(x, y);
+  game.stroke();
+  game.strokeStyle = 'yellow';
+}
+
+
+const tanOfLine = Math.tan(PI * (lineProps.d) / 180);
+
+
+
+const checkForBoy = (boy) => {
+  const O = ((boy.x + boy.w) - lineProps.x),
+    A = (lineProps.y - (boy.y + boy.h));
+  console.log(O)
+  O / A >= tanOfLine &&
+    (() => {
+      console.log(O)
+      boy.x = lineProps.x - boy.w;
+      // boy.y = lineProps.y - boy.h;
+      boy.x += O;
+      // boy.y += A;
+    })()
+}
 
 let id = 0;
 
@@ -24,8 +72,15 @@ class Component {
 
       this.frame = 0;
       this.updateTime = 0;
-      this.animData = {};
-      
+      this.animData = {
+        anim: {}
+      };
+      /**
+      * animation data:
+      - X,Y positions for where to start the animation.
+      -How many frames.
+      */
+
       //Preload Image
       const img = document.createElement("img");
       img.setAttribute("src", this.animations.spriteSheet);
@@ -33,28 +88,33 @@ class Component {
 
       //Animation player
       this.play = () => {
-        if (this.updateTime === this.animations.speed) {
+        if (this.updateTime === this.animations.speed) { //checks how many gameloops before going to next frame of animation
           this.updateTime = 0;
           if (this.frame === this.animData.limit) {
-            this.animations.y = this.animations.frameHeight * this.animData.origin;
-            this.animations.x = 0;
+            this.animations.y = this.animations.frameHeight * this.animData.yOrigin;
+            this.animations.x = this.animData.xOrigin;
             this.frame = 0;
           }
-          this.animations.x += this.animations.frameWidth;
+          this.animations.x = this.frame * this.animations.frameWidth;
           this.frame++;
         }
         this.updateTime++;
       }
 
-      //animate function to be called externally
+      //animate function sets the animation data in the animData object.
       this.animate = (anim) => {
-        this.frame = 0;
-        this.updateTime = 0;
+        if (!this.animData.anim[anim]) {
+          this.animData.anim = {};
+          this.animData.anim[anim] = true;
+          this.frame = 0;
+          this.updateTime = 0;
 
-        this.animData.origin = this.animations[anim][0];
-        this.animData.limit = this.animations[anim][1];
-        this.animations.y = this.animations.frameHeight * this.animData.origin;
-        this.animations.x = 0;
+          this.animData.yOrigin = this.animations[anim][0];
+          this.animData.xOrigin = this.animations[anim][1];
+          this.animData.limit = this.animations[anim][2];
+          this.animations.y = this.animations.frameHeight * this.animData.yOrigin;
+          this.animations.x = this.animData.xOrigin;
+        }
       }
     }
 
@@ -66,7 +126,7 @@ class Component {
           game.fillStyle = this.color;
           game.fillRect(this.x, this.y, this.w, this.h);
         })();
-        
+
       if (this.animations) {
         game.drawImage(this.animations.spriteSheet, this.animations.x, this.animations.y, this.animations.frameWidth, this.animations.frameHeight, this.x, this.y, this.animations.imageSizeX, this.animations.imageSizeY);
         this.play();
@@ -109,6 +169,7 @@ export const initScene = (xcor, ycor, width, height, obj) => {
     game.clearRect(xcor, ycor, obj.w || width, obj.h || height);
     game.fillStyle = obj.color;
     game.fillRect(xcor, ycor, width, height);
+    drawLine();
     for (let i = 0; i < renderCommands.length; i++) {
 
       const currentComponent = renderCommands[i]();
@@ -147,33 +208,90 @@ export const initScene = (xcor, ycor, width, height, obj) => {
               othersYPos < exceptYPos + exceptHeight) {
 
               if (otherComponent.rigidBody) {
-
+                console.log(currentComponent)
                 if (exceptXPos < othersXPos) {
                   if (exceptYPos < othersYPos) {
                     if (exceptXPos + exceptWidth - othersXPos < exceptYPos + exceptHeight - othersYPos) {
-                      currentComponent.x = othersXPos - exceptWidth;
+                      if(otherComponent.reactsTo[currentComponent.name]){
+                        let v1 = otherComponent.lv || 0, v2 = currentComponent.rv;
+                        currentComponent.x -= Math.abs(v2 - v1);
+                      }else{
+                        currentComponent.x -= currentComponent.lv;
+                      }
+                      // otherComponent.movable && (otherComponent.x += exceptXPos + exceptWidth - othersXPos);
+                      // currentComponent.x = othersXPos - exceptWidth;//at left
                     } else {
-                      currentComponent.y = othersYPos - exceptHeight;
+                      if(otherComponent.reactsTo[currentComponent.name]){
+                        let v1 = otherComponent.uv || 0, v2 = currentComponent.dv;
+                        currentComponent.y -= Math.abs(v2 - v1);
+                      }else{
+                        currentComponent.y -= currentComponent.uv;
+                      }
+                      // otherComponent.movable && (otherComponent.y += exceptYPos + exceptHeight - othersYPos);
+                      // currentComponent.y = othersYPos - exceptHeight;//at top
                     }
                   } else {
                     if (exceptXPos + exceptWidth - othersXPos < othersYPos + othersHeight - exceptYPos) {
-                      currentComponent.x = othersXPos - exceptWidth;
+                      if(otherComponent.reactsTo[currentComponent.name]){
+                       otherComponent.name === 'boy' && console.log('pp')
+                        let v1 = otherComponent.lv || 0, v2 = currentComponent.rv;
+                        currentComponent.x -= Math.abs(v2 - v1);
+                      }else{
+                        currentComponent.x -= currentComponent.lv;
+                      }
+                      // otherComponent.movable && (otherComponent.x += exceptXPos + exceptWidth - othersXPos);
+                      // currentComponent.x = othersXPos - exceptWidth;//at left
                     } else {
-                      currentComponent.y = othersYPos + othersHeight;
+                      if(otherComponent.reactsTo[currentComponent.name]){
+                        let v1 = otherComponent.dv || 0, v2 = currentComponent.uv;
+                        currentComponent.y -= Math.abs(v2 - v1);
+                      }else{
+                        currentComponent.y += currentComponent.dv;
+                      }
+                      // otherComponent.movable && (otherComponent.y -= othersYPos + othersHeight - exceptYPos);
+                      // currentComponent.y = othersYPos + othersHeight;//at bottom
                     }
                   }
                 } else {
                   if (exceptYPos < othersYPos) {
                     if (othersXPos + othersWidth - exceptXPos < exceptYPos + exceptHeight - othersYPos) {
-                      currentComponent.x = othersXPos + othersWidth;
+                      if(otherComponent.reactsTo[currentComponent.name]){
+                        let v1 = otherComponent.rv || 0, v2 = currentComponent.lv;
+                        currentComponent.x -= Math.abs(v2 - v1);
+                      }else{
+                        currentComponent.x += currentComponent.rv;
+                      }
+                      // otherComponent.movable && (otherComponent.x -= othersXPos + othersWidth - exceptXPos);
+                      // currentComponent.x = othersXPos + othersWidth;//at right
                     } else {
-                      currentComponent.y = othersYPos - exceptHeight;
+                      if(otherComponent.reactsTo[currentComponent.name]){
+                        let v1 = otherComponent.uv || 0, v2 = currentComponent.dv;
+                        currentComponent.y -= Math.abs(v2 - v1);
+                      }else{
+                        currentComponent.y -= currentComponent.uv;
+                      }
+                      // otherComponent.movable && (otherComponent.y += exceptYPos + exceptHeight - othersYPos);
+                      // currentComponent.y = othersYPos - exceptHeight;//at top
                     }
                   } else {
                     if (othersXPos + othersWidth - exceptXPos < othersYPos + othersHeight - exceptYPos) {
-                      currentComponent.x = othersXPos + othersWidth;
+                      if(otherComponent.reactsTo[currentComponent.name]){
+                        let v1 = otherComponent.rv || 0, v2 = currentComponent.lv;
+                        currentComponent.x -= Math.abs(v2 - v1);
+                      }else{
+                        currentComponent.x += currentComponent.rv;
+                      }
+                      // otherComponent.movable && (otherComponent.x -= othersXPos + othersWidth - exceptXPos);
+                      // currentComponent.x = othersXPos + othersWidth;//at right
                     } else {
-                      currentComponent.y = othersYPos + othersHeight;
+                      if(otherComponent.reactsTo[currentComponent.name]){
+                        let v1 = otherComponent.dv || 0, v2 = currentComponent.uv;
+                        currentComponent.y -= Math.abs(v2 - v1);
+                      }else{
+                        currentComponent.y += currentComponent.dv;
+                      }
+                      // otherComponent.movable && (otherComponent.y -= othersYPos + othersHeight - exceptYPos);
+                      // currentComponent.y = othersYPos + othersHeight;//at bottom
                     }
                   }
                 }
@@ -191,7 +309,9 @@ export const initScene = (xcor, ycor, width, height, obj) => {
         currentComponent.x > width ||
         currentComponent.x < 0) &&
       remove(currentComponent);
+      // currentComponent.name === 'boy' && checkForBoy(currentComponent);
     }
+    frame++;
     requestAnimationFrame(gameLoop);
   };
   gameLoop();
@@ -239,6 +359,7 @@ const redBox = component({
     uv: 5,
     dv: 5,
     facingLeft: false,
+    rigidBody: true,
     // canJump: false,
     canCollide: true,
     reactsTo: {
@@ -253,10 +374,11 @@ const redBox = component({
       frameHeight: 450,
 
       //animations
-      downAnim: [0, 3],
-      rightAnim: [3, 3],
-      leftAnim: [2, 3],
-      upAnim: [1, 3]
+      downAnim: [0, 0, 4],
+      rightAnim: [3, 0, 4],
+      leftAnim: [2, 0, 4],
+      upAnim: [1, 0, 4],
+      idle: [0, 0, 1]
     },
   },
   states: {
@@ -271,15 +393,19 @@ const redBox = component({
     },
     controls: {
       ArrowUp(e) {
+        e.animate('upAnim');
         e.y -= e.uv;
       },
       ArrowDown(e) {
+        e.animate('downAnim');
         e.y += e.dv;
       },
       ArrowLeft(e) {
+        e.animate('leftAnim');
         e.x -= e.lv;
       },
       ArrowRight(e) {
+        e.animate('rightAnim');
         e.x += e.rv;
       },
       d(e) {
@@ -296,75 +422,10 @@ const redBox = component({
   }
 });
 
-const onPress = {
-  ArrowLeft: true,
-  ArrowRight: true,
-  ArrowUp: true,
-  ArrowDown: true,
-};
+document.addEventListener('keyup', e => {
+  redBox.animate('idle');
+})
 
-Object.keys(onPress).forEach(e => {
-  let val = onPress[e];
-  Object.defineProperty(onPress, e, {
-    get() {
-      return val;
-    },
-    set(newVal) {
-
-      if (!newVal) {
-        const {
-          [e]: except, ...others
-        } = onPress;
-
-        Object.keys(others).forEach(i => {
-          onPress[i] = true;
-        });
-      }
-      val = newVal;
-    }
-  });
-});
-
-document.addEventListener("keydown", e => {
-
-  const val = e.key;
-
-  switch (true) {
-    case val === "ArrowLeft" && onPress[val]:
-      onPress[val] = false;
-      redBox.animate('leftAnim');
-      break;
-    case val === "ArrowRight" && onPress[val]:
-      onPress[val] = false;
-      redBox.animate('rightAnim');
-      break;
-    case val === "ArrowDown" && onPress[val]:
-      onPress[val] = false;
-      redBox.animate('downAnim');
-      break;
-    case val === "ArrowUp" && onPress[val]:
-      onPress[val] = false;
-      redBox.animate('upAnim');
-      break;
-      // case val === "ArrowUp" && onPress[val]:
-      //   // onPress[val] = false;
-      //   if (!redBox.canJump) return;
-      //   redBox.canJump = false;
-      //   let max = 0;
-      //   redBox.gravity = false;
-      //   redBox.jump = () => {
-      //     if (max === 60) {
-      //       redBox.gravity = true;
-      //       return;
-      //     }
-      //     redBox.y -= redBox.jv;
-      //     max+=5;
-      //     requestAnimationFrame(redBox.jump)
-      //   }
-      //   redBox.jump()
-      //   break;
-  }
-});
 /**
  * @param 
  */
@@ -385,7 +446,9 @@ const enemy = () =>
       r: undefined,
       canCollide: true,
       reactsTo: {
-        bullet: true
+        bullet: true,
+        enemy: true,
+        boy: true
       },
       rigidBody: true
     },
@@ -403,8 +466,11 @@ const enemy = () =>
         // this.name !== "block" && (this.r ? (this.y += 5) : (this.y -= 5));
       },
       onCollision(e) {
-        e.name === "bullet" && (this.isHit = true);
-        remove(e);
+        if(e.name === "bullet") {
+          this.isHit = true
+          remove(e);
+        };
+        
       }
     }
   });
@@ -422,21 +488,21 @@ block.y = 300;
 block.x = 450;
 block.w = 50;
 block.h = 200;
-const block2 = enemy();
-block2.y = 400;
-block2.x = 600;
-block2.w = 100;
-block2.h = 300;
-const block3 = enemy();
-block3.y = 600;
-block3.x = 200;
-block3.w = 100;
-block3.h = 50;
-const block4 = enemy();
-block4.y = 100;
-block4.x = 200;
-block4.w = 100;
-block4.h = 50;
+// const block2 = enemy();
+// block2.y = 400;
+// block2.x = 600;
+// block2.w = 100;
+// block2.h = 300;
+// const block3 = enemy();
+// block3.y = 600;
+// block3.x = 200;
+// block3.w = 100;
+// block3.h = 50;
+// const block4 = enemy();
+// block4.y = 100;
+// block4.x = 200;
+// block4.w = 100;
+// block4.h = 50;
 
 // const a = redBox.id,
 //     b = c2.id,
