@@ -17,7 +17,7 @@ const lineProps = {
 
 let frame = 0;
 setInterval(() => {
-  frameRateTxt.innerText =`${frame}fps`;
+  frameRateTxt.innerText = `${frame}fps`;
   frame = 0;
 }, 1000);
 
@@ -206,92 +206,48 @@ export const initScene = (xcor, ycor, width, height, obj) => {
               othersXPos < exceptXPos + exceptWidth &&
               exceptYPos < othersYPos + othersHeight &&
               othersYPos < exceptYPos + exceptHeight) {
-                // console.log(currentComponent)
               if (otherComponent.rigidBody) {
-              
-                if (exceptXPos < othersXPos) {
-                  if (exceptYPos < othersYPos) {
-                    if (exceptXPos + exceptWidth - othersXPos < exceptYPos + exceptHeight - othersYPos) {
 
-                      if(otherComponent.reactsTo[currentComponent.name]){
-                        let v1 = otherComponent.lv || 0, v2 = currentComponent.rv || 0;
-                        const diff = Math.abs(v2 - v1);
-                        currentComponent.x -= diff;
-                        otherComponent.x += diff;
-                      }else{
-                        currentComponent.x -= currentComponent.lv || 0;
-                      }//at left
+                if (exceptXPos < othersXPos) {
+                  const xD = exceptXPos + exceptWidth - othersXPos;
+                  if (exceptYPos < othersYPos) {
+                    const yD = exceptYPos + exceptHeight - othersYPos
+                    if (xD < yD) {
+                        otherComponent.x += xD;
+                      //at left
                     } else {
-                      if(otherComponent.reactsTo[currentComponent.name]){
-                        let v1 = otherComponent.uv || 0, v2 = currentComponent.dv || 0;
-                        const diff = Math.abs(v2 - v1);
-                        currentComponent.y -= diff;
-                        otherComponent.y += diff;
-                      }else{
-                        currentComponent.y -= currentComponent.uv || 0;
-                      }//at top
+                       otherComponent.y += yD;
+                      //at top
                     }
                   } else {
-                    if (exceptXPos + exceptWidth - othersXPos < othersYPos + othersHeight - exceptYPos) {
-                      if(otherComponent.reactsTo[currentComponent.name]){
-                        let v1 = otherComponent.lv || 0, v2 = currentComponent.rv || 0;
-                        const diff = Math.abs(v2 - v1);
-                        currentComponent.x -= diff;
-                        otherComponent.x += diff;
-                      }else{
-                        currentComponent.x -= currentComponent.lv || 0;
-                      };//at left
+                    const yD = othersYPos + othersHeight - exceptYPos;
+                    if (xD < yD) {
+                      otherComponent.x += xD;
+                      //at left
                     } else {
-                      if(otherComponent.reactsTo[currentComponent.name]){
-                        let v1 = otherComponent.dv || 0, v2 = currentComponent.uv || 0;
-                        const diff = Math.abs(v2 - v1);
-                        currentComponent.y += diff;
-                        otherComponent.y -= diff;
-                      }else{
-                        currentComponent.y += currentComponent.dv || 0;
-                      }//at bottom
+                      otherComponent.y -= yD;
+                      //at bottom
                     }
                   }
                 } else {
+                  const xD = othersXPos + othersWidth - exceptXPos;
                   if (exceptYPos < othersYPos) {
-                    if (othersXPos + othersWidth - exceptXPos < exceptYPos + exceptHeight - othersYPos) {
-                      if(otherComponent.reactsTo[currentComponent.name]){
-                        let v1 = otherComponent.rv || 0, v2 = currentComponent.lv || 0;
-                        const diff = Math.abs(v2 - v1);
-                        currentComponent.x += diff;
-                        otherComponent.x -= diff;
-                      }else{
-                        currentComponent.x += currentComponent.rv || 0;
-                      }//at right
+                    const yD = exceptYPos + exceptHeight - othersYPos;
+                    if (xD < yD) {
+                        otherComponent.x -= xD;
+                      //at right
                     } else {
-                      if(otherComponent.reactsTo[currentComponent.name]){
-                        let v1 = otherComponent.uv || 0, v2 = currentComponent.dv || 0;
-                        const diff = Math.abs(v2 - v1);
-                        currentComponent.y -= diff;
-                        otherComponent.y += diff;
-                      }else{
-                        currentComponent.y -= currentComponent.uv || 0;
-                      }//at top
+                       otherComponent.y += yD
+                       //at top
                     }
                   } else {
-                    if (othersXPos + othersWidth - exceptXPos < othersYPos + othersHeight - exceptYPos) {
-                      if(otherComponent.reactsTo[currentComponent.name]){
-                        let v1 = otherComponent.rv || 0, v2 = currentComponent.lv || 0;
-                        const diff = Math.abs(v2 - v1);
-                        currentComponent.x += diff;
-                        otherComponent.x -= diff;
-                      }else{
-                        currentComponent.x += currentComponent.rv || 0;
-                      }//at right
+                    const yD = othersYPos + othersHeight - exceptYPos;
+                    if (xD < yD) {
+                        otherComponent.x -= xD;
+                       //at right
                     } else {
-                      if(otherComponent.reactsTo[currentComponent.name]){
-                        let v1 = otherComponent.dv || 0, v2 = currentComponent.uv || 0;
-                        const diff = Math.abs(v2 - v1);
-                        currentComponent.y += diff;
-                        otherComponent.y -= diff;
-                      }else{
-                        currentComponent.y += currentComponent.dv || 0;
-                      }//at bottom
+                        otherComponent.y -= yD
+                       //at bottom
                     }
                   }
                 }
@@ -350,10 +306,18 @@ const redBox = component({
   props: {
     name: "boy",
     mass: 10,
-    x: 40,
-    y: 20,
     w: 50,
     h: 50,
+
+    // x: 600,
+    // y: 200,
+    // lv: 0,
+    // rv: 0,
+    // uv: 0,
+    // dv: 0,
+
+    x: 40,
+    y: 20,
     lv: 5,
     rv: 5,
     uv: 5,
@@ -361,9 +325,10 @@ const redBox = component({
     facingLeft: false,
     rigidBody: true,
     // canJump: false,
+    // gravity: true,
     canCollide: true,
     reactsTo: {
-      enemy: true
+      // enemy: true
     },
     animations: {
       spriteSheet: "./assets/img/sprite-sheet.png",
@@ -388,24 +353,42 @@ const redBox = component({
       //   this.y = this.y;
       //   this.canJump = true;
       // }
-      // if (this.x < 10) this.x = 10;
-      // else if (this.x > 950) this.x = 950;
+      if (this.x < 10) this.x = 10;
+      else if (this.x > 950) this.x = 950;
     },
     controls: {
       ArrowUp(e) {
-        e.animate('upAnim');
-        e.y -= e.uv;
+        // e.animate('upAnim');
+        // e.uv = 5;
+        // e.y -= e.uv;
+        // if(!redBox.canJump) return;
+        // redBox.canJump = false;
+        // let max = 0;
+        // redBox.gravity = false;
+        // redBox.jump = () => {
+        //   if(max === 60){
+        //     redBox.gravity = true;
+        //     return
+        //   }
+        //   redBox.y -= 30;
+        //   max += 5;
+        //   requestAnimationFrame(redBox.jump);
+        // }
+        // redBox.jump();
       },
       ArrowDown(e) {
         e.animate('downAnim');
+        e.dv = 5;
         e.y += e.dv;
       },
       ArrowLeft(e) {
         e.animate('leftAnim');
+        e.lv = 5;
         e.x -= e.lv;
       },
       ArrowRight(e) {
         e.animate('rightAnim');
+        e.rv = 5;
         e.x += e.rv;
       },
       d(e) {
@@ -418,7 +401,9 @@ const redBox = component({
         }
       }
     },
-    onCollision(e) {}
+    onCollision(e) {
+      
+    }
   }
 });
 
@@ -444,6 +429,8 @@ const enemy = () =>
       hitColor: "red",
       normalColor: "yellow",
       r: undefined,
+      uv: 10,
+      dv: 10,
       canCollide: true,
       reactsTo: {
         bullet: true,
@@ -458,15 +445,15 @@ const enemy = () =>
           (this.color = this.hitColor) :
           (this.color = this.normalColor);
         this.isHit = false;
-        // if (this.y >= 700) {
-        //   this.r = false;
-        // } else if (this.y <= 100) {
-        //   this.r = true;
-        // }
-        // this.name !== "block" && (this.r ? (this.y += 5) : (this.y -= 5));
+        if (this.y >= 700) {
+          this.r = false;
+        } else if (this.y <= 100) {
+          this.r = true;
+        }
+         (this.r ? (this.y += this.uv) : (this.y -=this.dv));
       },
       onCollision(e) {
-        if(e.name === "bullet") {
+        if (e.name === "bullet") {
           this.isHit = true
           remove(e);
         };
@@ -483,26 +470,28 @@ const enemy = () =>
 // c2.x = 600;
 // c2.y = 700;
 // c2.normalColor = '#00D4FF';
-const block = enemy();
-block.y = 300;
-block.x = 450;
-block.w = 50;
-block.h = 200;
 const block2 = enemy();
 block2.y = 400;
 block2.x = 600;
 block2.w = 100;
 block2.h = 300;
+const block = enemy();
+block.y = 300;
+block.x = 450;
+block.w = 50;
+block.h = 200;
 const block3 = enemy();
 block3.y = 600;
 block3.x = 200;
 block3.w = 100;
 block3.h = 50;
+// block3.dv = 5
 const block4 = enemy();
 block4.y = 100;
-block4.x = 200;
+block4.x = 300;
 block4.w = 100;
 block4.h = 50;
+
 
 // const a = redBox.id,
 //     b = c2.id,
