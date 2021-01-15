@@ -1,8 +1,8 @@
 import {
     allComponentData
 } from './components.js'
-export const resolveCollision = (currentComponent, components) => {
-    // if(!currentComponent)return;
+export const resolveCollision = (currentComponent) => {
+
     const {
         [currentComponent.id]: except, ...others
     } = allComponentData,
@@ -12,91 +12,89 @@ export const resolveCollision = (currentComponent, components) => {
 
         const otherComponent = others[othersArr[e]];
 
+        const exceptXPos = currentComponent.x,
+            exceptYPos = currentComponent.y,
+            exceptWidth = currentComponent.w,
+            exceptHeight = currentComponent.h,
+            othersXPos = otherComponent.x,
+            othersYPos = otherComponent.y,
+            othersWidth = otherComponent.w,
+            othersHeight = otherComponent.h;
 
-            const exceptXPos = currentComponent.x,
-                exceptYPos = currentComponent.y,
-                exceptWidth = currentComponent.w,
-                exceptHeight = currentComponent.h,
-                othersXPos = otherComponent.x,
-                othersYPos = otherComponent.y,
-                othersWidth = otherComponent.w,
-                othersHeight = otherComponent.h;
+        if (exceptXPos < othersXPos + othersWidth &&
+            othersXPos < exceptXPos + exceptWidth &&
+            exceptYPos < othersYPos + othersHeight &&
+            othersYPos < exceptYPos + exceptHeight) {
 
-            if (exceptXPos < othersXPos + othersWidth &&
-                othersXPos < exceptXPos + exceptWidth &&
-                exceptYPos < othersYPos + othersHeight &&
-                othersYPos < exceptYPos + exceptHeight) {
-                const collisionData = {
-                    entity: otherComponent
-                };
-                if (otherComponent.rigidBody) {
+            let collisionData = {entitiy: otherComponent};
 
-                    if (exceptXPos < othersXPos) {
-                        const xD = exceptXPos + exceptWidth - othersXPos;
-                        if (exceptYPos < othersYPos) {
-                            const yD = exceptYPos + exceptHeight - othersYPos;
-                            if (xD < yD) {
+            if (otherComponent.rigidBody && currentComponent.reactsWith[otherComponent.name]) {
+                if (exceptXPos < othersXPos) {
+                    const xD = exceptXPos + exceptWidth - othersXPos;
+                    collisionData.displacementX = xD;
 
+                    if (exceptYPos < othersYPos) {
+                        const yD = exceptYPos + exceptHeight - othersYPos;
+                        collisionData.displacementY = yD;
 
-                                collisionData.displacement = ['x', -xD];
-                                    collisionData.atLeft = true;
-                                //at left
-                            } else {
-                                
-                                collisionData.displacement = ['y', -yD];
-                                    collisionData.atTop = true;
-                                //at top
-                            }
+                        if (xD < yD) {
+                            otherComponent.x += xD;
+                            resolveCollision(otherComponent);
+                            //at left
                         } else {
-                            const yD = othersYPos + othersHeight - exceptYPos;
-                            if (xD < yD) {
-                                
-                                collisionData.displacement = ['x', -xD];
-                                    collisionData.atLeft = true;
-                                 //at left
-                            } else {
-                                
-                                collisionData.displacement = ['y', yD];
-                                    collisionData.atBottom = true;
-                                 //at bottom
-                            }
+                            otherComponent.y += yD;
+                            resolveCollision(otherComponent);
+                            //at top
                         }
                     } else {
-                        const xD = othersXPos + othersWidth - exceptXPos;
-                        if (exceptYPos < othersYPos) {
-                            const yD =  exceptYPos + exceptHeight - othersYPos;
-                            if (xD < yD) {
-                                
-                                collisionData.displacement = ['x', xD];
-                                    collisionData.atRight = true;
-                                 //at right
-                            } else {
-                                
-                                collisionData.displacement = ['y', -yD];
-                                    collisionData.atTop = true;
-                                 //at top
-                            }
+                        const yD = othersYPos + othersHeight - exceptYPos;
+                        collisionData.displacementY = yD;
+
+                        if (xD < yD) {
+                            otherComponent.x += xD;
+                            resolveCollision(otherComponent);
+                            //at left
                         } else {
-                            const yD = othersYPos + othersHeight - exceptYPos;
-                            if (xD < yD) {
-                                
-                                collisionData.displacement = ['x', xD];
-                                    collisionData.atRight = true;
-                                 //at right
-                            } else {
-                                
-                                collisionData.displacement = ['y', yD];
-                                    collisionData.atBottom = true;
-                                 //at bottom
-                            }
+                            otherComponent.y -= yD;
+                            resolveCollision(otherComponent);
+                            //at bottom
                         }
                     }
+                } else {
+                    const xD = othersXPos + othersWidth - exceptXPos;
+                    collisionData.displacementX = xD;
+
+                    if (exceptYPos < othersYPos) {
+                        const yD = exceptYPos + exceptHeight - othersYPos;
+                        collisionData.displacementY = yD;
+
+                        if (xD < yD) {
+                            otherComponent.x -= xD;
+                            resolveCollision(otherComponent);
+                            //at right
+                        } else {
+                            otherComponent.y += yD;
+                            resolveCollision(otherComponent);
+                            //at top
+                        }
+                    } else {
+                        const yD = othersYPos + othersHeight - exceptYPos;
+                        collisionData.displacementY = yD;
+
+                        if (xD < yD) {
+                            otherComponent.x -= xD;
+                            resolveCollision(otherComponent);
+                            //at right
+                        } else {
+                            otherComponent.y -= yD;
+                            resolveCollision(otherComponent);
+                            //at bottom
+                        }
+                    }
+                    
                 }
-
-                components.splice(components.indexOf(otherComponent.id), 1);
-                currentComponent.onCollision && currentComponent.onCollision(collisionData);
-                
-
             }
-        };
+            currentComponent.onCollision && currentComponent.onCollision(collisionData);
+        }
     }
+}

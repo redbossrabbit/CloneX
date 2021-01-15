@@ -14,6 +14,7 @@ import {
   loop,
   loopCommands
 } from './helper-functions.js';
+import {getKeyState} from './animation'
 
 const frameRateTxt = document.getElementById('frame-rate');
 
@@ -41,6 +42,7 @@ export const initScene = (xcor, ycor, width, height, obj) => {
     "keydown",
     e => {
       keyboardVals[e.key] = true;
+      getKeyState(true);
     },
     true
   );
@@ -48,6 +50,7 @@ export const initScene = (xcor, ycor, width, height, obj) => {
     "keyup",
     e => {
       keyboardVals[e.key] = false;
+      getKeyState(false);
     },
     true
   );
@@ -70,98 +73,7 @@ export const initScene = (xcor, ycor, width, height, obj) => {
           keyboardVals[e] && currentComponent.controls[e](currentComponent);
         });
 
-
-      const resolve = (currentComponent) => {
-
-        const {
-          [currentComponent.id]: except, ...others
-        } = allComponentData,
-        othersArr = Object.keys(others);
-
-        for (let e = 0; e < othersArr.length; e++) {
-
-          const otherComponent = others[othersArr[e]];
-
-          const exceptXPos = currentComponent.x,
-            exceptYPos = currentComponent.y,
-            exceptWidth = currentComponent.w,
-            exceptHeight = currentComponent.h,
-            othersXPos = otherComponent.x,
-            othersYPos = otherComponent.y,
-            othersWidth = otherComponent.w,
-            othersHeight = otherComponent.h;
-
-          if (exceptXPos < othersXPos + othersWidth &&
-            othersXPos < exceptXPos + exceptWidth &&
-            exceptYPos < othersYPos + othersHeight &&
-            othersYPos < exceptYPos + exceptHeight) {
-            const collisionData = {
-              entity: otherComponent
-            };
-            if (otherComponent.rigidBody && currentComponent.reactsWith[otherComponent.name]) {
-              if (exceptXPos < othersXPos) {
-                const xD = exceptXPos + exceptWidth - othersXPos;
-
-                if (exceptYPos < othersYPos) {
-                  const yD = exceptYPos + exceptHeight - othersYPos;
-
-                  if (xD < yD) {
-                    otherComponent.x += xD;
-                    resolve(otherComponent);
-                    //at left
-                  } else {
-                    otherComponent.y += yD;
-                    resolve(otherComponent);
-                    //at top
-                  }
-                } else {
-                  const yD = othersYPos + othersHeight - exceptYPos;
-
-                  if (xD < yD) {
-                    otherComponent.x += xD;
-                    resolve(otherComponent);
-                    //at left
-                  } else {
-                    otherComponent.y -= yD;
-                    resolve(otherComponent);
-                    //at bottom
-                  }
-                }
-              } else {
-                const xD = othersXPos + othersWidth - exceptXPos;
-
-                if (exceptYPos < othersYPos) {
-                  const yD = exceptYPos + exceptHeight - othersYPos;
-                  
-                  if (xD < yD) {
-                    otherComponent.x -= xD;
-                    resolve(otherComponent);
-                    //at right
-                  } else {
-                    otherComponent.y += yD;
-                    resolve(otherComponent);
-                    //at top
-                  }
-                } else {
-                  const yD = othersYPos + othersHeight - exceptYPos;
-                  
-                  if (xD < yD) {
-                    otherComponent.x -= xD;
-                    resolve(otherComponent);
-                    //at right
-                  } else {
-                    otherComponent.y -= yD;
-                    resolve(otherComponent);
-                    //at bottom
-                  }
-                }
-              }
-            }
-            currentComponent.onCollision && currentComponent.onCollision(collisionData);
-          }
-        }
-      }
-      resolve(currentComponent);
+      resolveCollision(currentComponent);
     }
     frame++;
     for (const e of loopCommands.values()) {
@@ -230,7 +142,7 @@ const boy = component({
       rightAnim: [3, 0, 4],
       leftAnim: [2, 0, 4],
       upAnim: [1, 0, 4],
-      idle: [0, 0, 1]
+      idle: [0, 0, 0]
     },
   },
   states: {
