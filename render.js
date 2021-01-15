@@ -4,6 +4,7 @@ document.body.append(scene);
 export const game = scene.getContext("2d");
 
 export const render = (component) => {
+  // console.log(component)
     component.color &&
       (() => {
         game.fillStyle = component.color;

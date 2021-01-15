@@ -18,7 +18,8 @@ export const setAnimation = (component) => {
 
       //Animation player
       component.play = () => {
-        if (component.updateTime === component.animations.speed) { //checks how many gameloops before going to next frame of animation
+        if (component.updateTime === component.animations.speed) {
+           //checks how many gameloops before going to next frame of animation
           component.updateTime = 0;
           if (component.frame >= component.animData.limit) {
             component.animations.y = component.animations.frameHeight * component.animData.yOrigin;
@@ -44,7 +45,7 @@ export const setAnimation = (component) => {
           component.animData.xOrigin = component.animations[anim][1];
           component.animData.limit = component.animations[anim][2];
           component.animations.y = component.animations.frameHeight * component.animData.yOrigin;
-          component.animations.x = component.animData.xOrigin;
+          component.animations.x = component.animations.frameWidth * (component.animData.xOrigin + 1);
         }
       }
 }

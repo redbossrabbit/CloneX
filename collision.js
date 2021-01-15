@@ -1,7 +1,8 @@
 import {
     allComponentData
 } from './components.js'
-export const resolveCollision = (currentComponent) => {
+export const resolveCollision = (currentComponent, components) => {
+    // if(!currentComponent)return;
     const {
         [currentComponent.id]: except, ...others
     } = allComponentData,
@@ -11,7 +12,6 @@ export const resolveCollision = (currentComponent) => {
 
         const otherComponent = others[othersArr[e]];
 
-        if (currentComponent.reactsWith[otherComponent.name]) {
 
             const exceptXPos = currentComponent.x,
                 exceptYPos = currentComponent.y,
@@ -32,96 +32,71 @@ export const resolveCollision = (currentComponent) => {
                 if (otherComponent.rigidBody) {
 
                     if (exceptXPos < othersXPos) {
+                        const xD = exceptXPos + exceptWidth - othersXPos;
                         if (exceptYPos < othersYPos) {
-                            if (exceptXPos + exceptWidth - othersXPos < exceptYPos + exceptHeight - othersYPos) {
+                            const yD = exceptYPos + exceptHeight - othersYPos;
+                            if (xD < yD) {
 
-                                if (otherComponent.reactsWith[currentComponent.name]) {
-                                    let v1 = otherComponent.lv || 0,
-                                        v2 = currentComponent.rv || 0;
-                                    currentComponent.x -= v1;
-                                    otherComponent.x += v2;
-                                } else {
-                                    currentComponent.x -= currentComponent.rv || 0 + otherComponent.lv || 0;
-                                } //at left
+
+                                collisionData.displacement = ['x', -xD];
+                                    collisionData.atLeft = true;
+                                //at left
                             } else {
-                                if (otherComponent.reactsWith[currentComponent.name]) {
-                                    let v1 = otherComponent.uv || 0,
-                                        v2 = currentComponent.dv || 0;
-                                    currentComponent.y -= v1;
-                                    otherComponent.y += v2;
-                                } else {
-                                    currentComponent.y -= currentComponent.dv || 0 + otherComponent.uv || 0;
-                                } //at top
+                                
+                                collisionData.displacement = ['y', -yD];
+                                    collisionData.atTop = true;
+                                //at top
                             }
                         } else {
-                            if (exceptXPos + exceptWidth - othersXPos < othersYPos + othersHeight - exceptYPos) {
-                                if (otherComponent.reactsWith[currentComponent.name]) {
-                                    let v1 = otherComponent.lv || 0,
-                                        v2 = currentComponent.rv || 0;
-                                    currentComponent.x -= v1;
-                                    otherComponent.x += v2;
-                                } else {
-                                    currentComponent.x -= currentComponent.rv || 0 + otherComponent.lv || 0;
-                                }; //at left
+                            const yD = othersYPos + othersHeight - exceptYPos;
+                            if (xD < yD) {
+                                
+                                collisionData.displacement = ['x', -xD];
+                                    collisionData.atLeft = true;
+                                 //at left
                             } else {
-                                if (otherComponent.reactsWith[currentComponent.name]) {
-                                    let v1 = otherComponent.dv || 0,
-                                        v2 = currentComponent.uv || 0;
-                                    currentComponent.y += v1;
-                                    otherComponent.y -= v2;
-                                } else {
-                                    currentComponent.y += currentComponent.uv || 0 + otherComponent.dv || 0;
-                                } //at bottom
+                                
+                                collisionData.displacement = ['y', yD];
+                                    collisionData.atBottom = true;
+                                 //at bottom
                             }
                         }
                     } else {
+                        const xD = othersXPos + othersWidth - exceptXPos;
                         if (exceptYPos < othersYPos) {
-                            if (othersXPos + othersWidth - exceptXPos < exceptYPos + exceptHeight - othersYPos) {
-                                if (otherComponent.reactsWith[currentComponent.name]) {
-                                    let v1 = otherComponent.rv || 0,
-                                        v2 = currentComponent.lv || 0;
-                                    currentComponent.x += v1;
-                                    otherComponent.x -= v2;
-                                } else {
-                                    currentComponent.x += currentComponent.lv || 0 + otherComponent.rv || 0;
-                                } //at right
+                            const yD =  exceptYPos + exceptHeight - othersYPos;
+                            if (xD < yD) {
+                                
+                                collisionData.displacement = ['x', xD];
+                                    collisionData.atRight = true;
+                                 //at right
                             } else {
-                                if (otherComponent.reactsWith[currentComponent.name]) {
-                                    let v1 = otherComponent.uv || 0,
-                                        v2 = currentComponent.dv || 0;
-                                    currentComponent.y -= v1;
-                                    otherComponent.y += v2;
-                                } else {
-                                    currentComponent.y -= currentComponent.dv || 0 + otherComponent.uv || 0;
-                                } //at top
+                                
+                                collisionData.displacement = ['y', -yD];
+                                    collisionData.atTop = true;
+                                 //at top
                             }
                         } else {
-                            if (othersXPos + othersWidth - exceptXPos < othersYPos + othersHeight - exceptYPos) {
-                                if (otherComponent.reactsWith[currentComponent.name]) {
-                                    let v1 = otherComponent.rv || 0,
-                                        v2 = currentComponent.lv || 0;
-                                    currentComponent.x += v1;
-                                    otherComponent.x -= v2;
-                                } else {
-                                    currentComponent.x += currentComponent.rv || 0 + otherComponent.rv || 0;
-                                } //at right
+                            const yD = othersYPos + othersHeight - exceptYPos;
+                            if (xD < yD) {
+                                
+                                collisionData.displacement = ['x', xD];
+                                    collisionData.atRight = true;
+                                 //at right
                             } else {
-                                if (otherComponent.reactsWith[currentComponent.name]) {
-                                    let v1 = otherComponent.dv || 0,
-                                        v2 = currentComponent.uv || 0;
-                                    currentComponent.y += v1;
-                                    otherComponent.y -= v2;
-                                } else {
-                                    currentComponent.y += currentComponent.dv || 0 + otherComponent.dv || 0;
-                                } //at bottom
+                                
+                                collisionData.displacement = ['y', yD];
+                                    collisionData.atBottom = true;
+                                 //at bottom
                             }
                         }
                     }
                 }
 
+                components.splice(components.indexOf(otherComponent.id), 1);
                 currentComponent.onCollision && currentComponent.onCollision(collisionData);
+                
 
             }
         };
     }
-}

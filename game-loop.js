@@ -56,25 +56,112 @@ export const initScene = (xcor, ycor, width, height, obj) => {
     game.clearRect(xcor, ycor, obj.w || width, obj.h || height);
     game.fillStyle = obj.color;
     game.fillRect(xcor, ycor, width, height);
+
     for (let i = 0; i < renderCommands.length; i++) {
 
       const currentComponent = renderCommands[i]();
 
+
       currentComponent.default && currentComponent.default();
+
 
       currentComponent.controls &&
         Object.keys(currentComponent.controls).forEach(e => {
           keyboardVals[e] && currentComponent.controls[e](currentComponent);
         });
 
-      if (currentComponent.canCollide) resolveCollision(currentComponent);
 
-      currentComponent.gravity && gravity(currentComponent);
-      (currentComponent.y > height ||
-        currentComponent.y < 0 ||
-        currentComponent.x > width ||
-        currentComponent.x < 0) &&
-      remove(currentComponent);
+      const resolve = (currentComponent) => {
+
+        const {
+          [currentComponent.id]: except, ...others
+        } = allComponentData,
+        othersArr = Object.keys(others);
+
+        for (let e = 0; e < othersArr.length; e++) {
+
+          const otherComponent = others[othersArr[e]];
+
+          const exceptXPos = currentComponent.x,
+            exceptYPos = currentComponent.y,
+            exceptWidth = currentComponent.w,
+            exceptHeight = currentComponent.h,
+            othersXPos = otherComponent.x,
+            othersYPos = otherComponent.y,
+            othersWidth = otherComponent.w,
+            othersHeight = otherComponent.h;
+
+          if (exceptXPos < othersXPos + othersWidth &&
+            othersXPos < exceptXPos + exceptWidth &&
+            exceptYPos < othersYPos + othersHeight &&
+            othersYPos < exceptYPos + exceptHeight) {
+            const collisionData = {
+              entity: otherComponent
+            };
+            if (otherComponent.rigidBody && currentComponent.reactsWith[otherComponent.name]) {
+              if (exceptXPos < othersXPos) {
+                const xD = exceptXPos + exceptWidth - othersXPos;
+
+                if (exceptYPos < othersYPos) {
+                  const yD = exceptYPos + exceptHeight - othersYPos;
+
+                  if (xD < yD) {
+                    otherComponent.x += xD;
+                    resolve(otherComponent);
+                    //at left
+                  } else {
+                    otherComponent.y += yD;
+                    resolve(otherComponent);
+                    //at top
+                  }
+                } else {
+                  const yD = othersYPos + othersHeight - exceptYPos;
+
+                  if (xD < yD) {
+                    otherComponent.x += xD;
+                    resolve(otherComponent);
+                    //at left
+                  } else {
+                    otherComponent.y -= yD;
+                    resolve(otherComponent);
+                    //at bottom
+                  }
+                }
+              } else {
+                const xD = othersXPos + othersWidth - exceptXPos;
+
+                if (exceptYPos < othersYPos) {
+                  const yD = exceptYPos + exceptHeight - othersYPos;
+                  
+                  if (xD < yD) {
+                    otherComponent.x -= xD;
+                    resolve(otherComponent);
+                    //at right
+                  } else {
+                    otherComponent.y += yD;
+                    resolve(otherComponent);
+                    //at top
+                  }
+                } else {
+                  const yD = othersYPos + othersHeight - exceptYPos;
+                  
+                  if (xD < yD) {
+                    otherComponent.x -= xD;
+                    resolve(otherComponent);
+                    //at right
+                  } else {
+                    otherComponent.y -= yD;
+                    resolve(otherComponent);
+                    //at bottom
+                  }
+                }
+              }
+            }
+            currentComponent.onCollision && currentComponent.onCollision(collisionData);
+          }
+        }
+      }
+      resolve(currentComponent);
     }
     frame++;
     for (const e of loopCommands.values()) {
@@ -84,54 +171,44 @@ export const initScene = (xcor, ycor, width, height, obj) => {
   };
   gameLoop();
 };
-
-
 /**--------------
  *
  * TEST AREA
  *
  * -----------------------*/
-
 const bullet = e =>
   component({
     props: {
       name: "bullet",
       color: "yellow",
-      mass: 1,
+      // mass: 1,
       x: !e.facingLeft ? e.x + 50 : e.x - 10,
       y: e.y + 25,
       w: 10,
       h: 3,
-      facingLeft: e.facingLeft
+      facingLeft: e.facingLeft,
+      reactsWith: {}
     },
     states: {
       default () {
-        !this.facingLeft ? (this.x += 10) : (this.x -= 10);
+        !this.facingLeft ? (this.x += 50) : (this.x -= 50);
+      },
+      onCollision(d) {
+        d.entity.isHit = true;
+        remove(this);
       }
     }
   });
 
 
-const redBox = component({
+const boy = component({
   props: {
     name: "boy",
     mass: 10,
     w: 50,
     h: 50,
-
-    // x: 600,
-    // y: 200,
-    // lv: 0,
-    // rv: 0,
-    // uv: 0,
-    // dv: 0,
-
     x: 40,
     y: 20,
-    lv: 5,
-    rv: 5,
-    uv: 5,
-    dv: 5,
     facingLeft: false,
     rigidBody: true,
     // canJump: false,
@@ -153,7 +230,7 @@ const redBox = component({
       rightAnim: [3, 0, 4],
       leftAnim: [2, 0, 4],
       upAnim: [1, 0, 4],
-      idle: [0, 0, 0]
+      idle: [0, 0, 1]
     },
   },
   states: {
@@ -171,6 +248,7 @@ const redBox = component({
     controls: {
       ArrowUp(e) {
         e.animate('upAnim');
+        e.uv = 5;
         e.y -= e.uv;
         e.isMoving = true;
         // if(!redBox.canJump) return;
@@ -190,17 +268,20 @@ const redBox = component({
       },
       ArrowDown(e) {
         e.animate('downAnim');
+        e.dv = 5;
         e.y += e.dv;
         e.isMoving = true;
       },
       ArrowLeft(e) {
         e.animate('leftAnim');
+        e.lv = 5;
         e.x -= e.lv;
         e.isMoving = true;
         e.facingLeft = true;
       },
       ArrowRight(e) {
         e.animate('rightAnim');
+        e.rv = 5;
         e.x += e.rv;
         e.isMoving = true;
         e.facingLeft = false;
@@ -209,15 +290,10 @@ const redBox = component({
         loop(shoot, 10);
       }
     },
-    onCollision(data) {
-      const D = data.displacement,
-        entity = data.entity;
-      // this[D[0]] += D[1];
-      // entity[D[0]] -= D[1];
-    }
+    onCollision(data) {}
   }
 });
-const shoot = () => bullet(redBox).facingLeft = redBox.facingLeft;
+const shoot = () => bullet(boy).facingLeft = boy.facingLeft;
 
 // document.addEventListener('keyup', e => {
 //   redBox.animate('idle');
@@ -231,21 +307,24 @@ const enemy = () =>
     props: {
       name: 'enemy',
       mass: 10,
+      color: 'red',
       x: undefined,
       y: undefined,
       w: 50,
       h: 50,
+      lv: 0,
+      rv: 0,
+      dv: 0,
+      uv: 0,
       gravity: false,
       bounds: {},
       isHit: false,
       r: undefined,
-      uv: 10,
-      dv: 10,
       canCollide: true,
       reactsWith: {
-        bullet: true,
         enemy: true,
-        boy: true
+        boy: true,
+        bullet: true
       },
       rigidBody: true
     },
@@ -255,64 +334,35 @@ const enemy = () =>
           (this.color = 'red') :
           (this.color = 'yellow');
         this.isHit = false;
-        // if (this.y >= 700) {
+        // this.x -= this.lv;
+        // if (this.y >= 600) {
         //   this.r = false;
+        //   this.uv = 10;
         // } else if (this.y <= 100) {
         //   this.r = true;
+        //   this.dv = 10;
         // }
-        // (this.r ? (this.y += this.dv) : (this.y -= this.uv));
+        // console.log(this.dv)
+        // this.r ? (this.y += this.dv) : (this.y -= this.uv);
       },
-      onCollision(data) {
-        const D = data.displacement,
-          entity = data.entity;
-        if (entity.name === "bullet") {
-          this.isHit = true
-          remove(e);
-        };
-        // entity[D[0]] -= D[1];
-
-        // console.log('p')
-      }
+      onCollision(data) {}
     }
   });
-// const c1 = enemy();
-// c1.x = 200;
-// c1.y = 500;
-// c1.normalColor = 'white';
-// const c2 = enemy();
-// c2.name = 'c2'
-// c2.x = 600;
-// c2.y = 700;
-// c2.normalColor = '#00D4FF';
-const block2 = enemy();
-block2.y = 400;
-block2.x = 600;
-block2.w = 100;
-block2.h = 300;
-const block = enemy();
-block.y = 300;
-block.x = 450;
-block.w = 50;
-block.h = 200;
 const block4 = enemy();
-block4.y = 100;
-block4.x = 100;
+block4.y = 90;
+block4.x = 300;
 block4.w = 100;
 block4.h = 50;
 const block3 = enemy();
-block3.y = 600;
-block3.x = 300;
+block3.y = 100;
+block3.x = 500;
 block3.w = 100;
 block3.h = 50;
-
-
-
-// const a = redBox.id,
-//     b = c2.id,
-//     c = renderCommands.slice(a, 1)[0],
-//     d = renderCommands.slice(b)[0];
-// renderCommands[a] = d;
-// renderCommands[b] = c; //switch id's
+const block5 = enemy();
+block5.y = 100;
+block5.x = 700;
+block5.w = 100;
+block5.h = 50;
 
 initScene(0, 0, 1000, 790, {
   color: "grey"
