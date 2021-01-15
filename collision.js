@@ -26,7 +26,9 @@ export const resolveCollision = (currentComponent) => {
             exceptYPos < othersYPos + othersHeight &&
             othersYPos < exceptYPos + exceptHeight) {
 
-            let collisionData = {entitiy: otherComponent};
+            let collisionData = {
+                entitiy: otherComponent
+            };
 
             if (otherComponent.rigidBody && currentComponent.reactsWith[otherComponent.name]) {
                 if (exceptXPos < othersXPos) {
@@ -38,12 +40,24 @@ export const resolveCollision = (currentComponent) => {
                         collisionData.displacementY = yD;
 
                         if (xD < yD) {
-                            otherComponent.x += xD;
-                            resolveCollision(otherComponent);
+                            if (currentComponent.static) {
+                                otherComponent.x += xD;
+                            } else if (otherComponent.static) {
+                                currentComponent.x -= xD
+                            } else {
+                                otherComponent.x += xD;
+                                resolveCollision(otherComponent);
+                            }
                             //at left
                         } else {
-                            otherComponent.y += yD;
-                            resolveCollision(otherComponent);
+                            if (currentComponent.static) {
+                                otherComponent.y += yD;
+                            } else if (otherComponent.static) {
+                                currentComponent.y -= yD
+                            } else {
+                                otherComponent.y += yD;
+                                resolveCollision(otherComponent);
+                            }
                             //at top
                         }
                     } else {
@@ -51,12 +65,24 @@ export const resolveCollision = (currentComponent) => {
                         collisionData.displacementY = yD;
 
                         if (xD < yD) {
-                            otherComponent.x += xD;
-                            resolveCollision(otherComponent);
+                            if (currentComponent.static) {
+                                otherComponent.x += xD;
+                            } else if (otherComponent.static) {
+                                currentComponent.x -= xD
+                            } else {
+                                otherComponent.x += xD;
+                                resolveCollision(otherComponent);
+                            }
                             //at left
                         } else {
-                            otherComponent.y -= yD;
-                            resolveCollision(otherComponent);
+                            if (currentComponent.static) {
+                                otherComponent.y -= yD;
+                            } else if (otherComponent.static) {
+                                currentComponent.y += yD
+                            } else {
+                                otherComponent.y -= yD;
+                                resolveCollision(otherComponent);
+                            }
                             //at bottom
                         }
                     }
@@ -69,12 +95,24 @@ export const resolveCollision = (currentComponent) => {
                         collisionData.displacementY = yD;
 
                         if (xD < yD) {
-                            otherComponent.x -= xD;
-                            resolveCollision(otherComponent);
+                            if (currentComponent.static) {
+                                otherComponent.x -= xD;
+                            } else if (otherComponent.static) {
+                                currentComponent.x += xD
+                            } else {
+                                otherComponent.x -= xD;
+                                resolveCollision(otherComponent);
+                            }
                             //at right
                         } else {
-                            otherComponent.y += yD;
-                            resolveCollision(otherComponent);
+                            if (currentComponent.static) {
+                                otherComponent.y += yD;
+                            } else if (otherComponent.static) {
+                                currentComponent.y -= yD
+                            } else {
+                                otherComponent.y += yD;
+                                resolveCollision(otherComponent);
+                            }
                             //at top
                         }
                     } else {
@@ -82,16 +120,28 @@ export const resolveCollision = (currentComponent) => {
                         collisionData.displacementY = yD;
 
                         if (xD < yD) {
-                            otherComponent.x -= xD;
-                            resolveCollision(otherComponent);
+                            if (currentComponent.static) {
+                                otherComponent.x -= xD;
+                            } else if (otherComponent.static) {
+                                currentComponent.x += xD
+                            } else {
+                                otherComponent.x -= xD;
+                                resolveCollision(otherComponent);
+                            }
                             //at right
                         } else {
-                            otherComponent.y -= yD;
-                            resolveCollision(otherComponent);
+                            if (currentComponent.static) {
+                                otherComponent.y -= yD;
+                            } else if (otherComponent.static) {
+                                currentComponent.y += yD
+                            } else {
+                                otherComponent.y -= yD;
+                                resolveCollision(otherComponent);
+                            }
                             //at bottom
                         }
                     }
-                    
+
                 }
             }
             currentComponent.onCollision && currentComponent.onCollision(collisionData);

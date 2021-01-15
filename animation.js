@@ -1,4 +1,4 @@
-let keyIsDown;
+let keyIsDown = true;
 export const setAnimation = (component) => {
   component.frame = 1;
   component.updateTime = 0;
@@ -35,7 +35,7 @@ export const setAnimation = (component) => {
   }
 
   //animate function sets the animation data in the animData object.
-  component.animate = (anim) => {
+  component.animate = anim => {
     if (!component.animData.anim[anim]) {
       component.animData.anim = {};
       component.animData.anim[anim] = true;

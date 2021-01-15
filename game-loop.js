@@ -56,6 +56,7 @@ export const initScene = (xcor, ycor, width, height, obj) => {
   );
 
   const gameLoop = () => {
+    getKeyState(false);
     game.clearRect(xcor, ycor, obj.w || width, obj.h || height);
     game.fillStyle = obj.color;
     game.fillRect(xcor, ycor, width, height);
@@ -220,6 +221,7 @@ const enemy = () =>
       name: 'enemy',
       mass: 10,
       color: 'red',
+      static: true,
       x: undefined,
       y: undefined,
       w: 50,
@@ -241,7 +243,7 @@ const enemy = () =>
       rigidBody: true
     },
     states: {
-      default () {
+      default() {
         this.isHit ?
           (this.color = 'red') :
           (this.color = 'yellow');
