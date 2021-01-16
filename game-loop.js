@@ -14,7 +14,9 @@ import {
   loop,
   loopCommands
 } from './helper-functions.js';
-import {getKeyState} from './animation'
+import {
+  getKeyState
+} from './animation'
 
 const frameRateTxt = document.getElementById('frame-rate');
 
@@ -26,13 +28,17 @@ setInterval(() => {
   frame = 0;
 }, 1000);
 
+const toBeRemoved = [];
 const remove = component => {
   delete allComponentData[component.id];
   renderCommands.splice(renderCommands.indexOf(component.render), 1);
 };
 
 let g = 20;
-const gravity = component => (component.y += g);
+const gravity = component => (component.y += component.y / 30);
+
+const img = document.createElement("img");
+  img.setAttribute("src", './assets/img/land.jpg');
 
 export const initScene = (xcor, ycor, width, height, obj) => {
   scene.width = width;
@@ -61,11 +67,15 @@ export const initScene = (xcor, ycor, width, height, obj) => {
     game.fillStyle = obj.color;
     game.fillRect(xcor, ycor, width, height);
 
+    // game.drawImage(img, 0, 0, width, height);
+
     for (let i = 0; i < renderCommands.length; i++) {
+      renderCommands[i]();
+    }
+    Object.keys(allComponentData).forEach(component => {
+      const currentComponent = allComponentData[component];
 
-      const currentComponent = renderCommands[i]();
-
-
+      currentComponent.gravity && gravity(currentComponent)
       currentComponent.default && currentComponent.default();
 
 
@@ -75,11 +85,18 @@ export const initScene = (xcor, ycor, width, height, obj) => {
         });
 
       resolveCollision(currentComponent);
-    }
-    frame++;
+
+      currentComponent.gravity && gravity(currentComponent);
+      (currentComponent.y > height ||
+        currentComponent.y < 0 ||
+        currentComponent.x > width ||
+        currentComponent.x < 0) &&
+      remove(currentComponent);
+    })
     for (const e of loopCommands.values()) {
       e[1]++;
     }
+    frame++;
     requestAnimationFrame(gameLoop);
   };
   gameLoop();
@@ -93,26 +110,33 @@ const bullet = e =>
   component({
     props: {
       name: "bullet",
-      color: "yellow",
+      color: "green",
       // mass: 1,
-      x: !e.facingLeft ? e.x + 50 : e.x - 10,
-      y: e.y + 25,
+      x: !e.facingLeft ? e.x + e.w : e.x - 10,
+      y: e.y,
       w: 10,
-      h: 3,
+      h: 10,
       facingLeft: e.facingLeft,
       reactsWith: {}
     },
     states: {
       default () {
-        !this.facingLeft ? (this.x += 50) : (this.x -= 50);
+        !this.facingLeft ? (this.x += 10) : (this.x -= 10);
       },
-      onCollision(d) {
-        d.entity.isHit = true;
+      onCollision({
+        entity
+      }) {
+        // entity.isHit = true;
         remove(this);
       }
     }
   });
 
+const {
+  ['log']: l
+} = console;
+
+let max = 0, hasReachedMax = true;
 
 const boy = component({
   props: {
@@ -124,9 +148,9 @@ const boy = component({
     y: 20,
     facingLeft: false,
     rigidBody: true,
-    // canJump: false,
-    // gravity: true,
-    canCollide: true,
+    canJump: true,
+    gravity: true,
+    // canCollide: true,
     reactsWith: {
       enemy: true
     },
@@ -143,59 +167,43 @@ const boy = component({
       rightAnim: [3, 0, 4],
       leftAnim: [2, 0, 4],
       upAnim: [1, 0, 4],
-      idle: [0, 0, 0]
+      idle: [0, 0, 1, {
+        still: true
+      }]
     },
   },
   states: {
     default () {
+      // hasReachedMax = true;
+      this.isColliding = false;
       !this.isMoving && this.animate('idle');
       this.isMoving = false;
-      // if (this.y >= 700 && this.gravity) {
-      //   this.gravity = false;
-      //   this.y = this.y;
-      //   this.canJump = true;
-      // }
       if (this.x < 10) this.x = 10;
       else if (this.x > 950) this.x = 950;
     },
     controls: {
       ArrowUp(e) {
-        e.animate('upAnim');
-        e.uv = 5;
-        e.y -= e.uv;
-        e.isMoving = true;
-        // if(!redBox.canJump) return;
-        // redBox.canJump = false;
-        // let max = 0;
-        // redBox.gravity = false;
-        // redBox.jump = () => {
-        //   if(max === 60){
-        //     redBox.gravity = true;
-        //     return
-        //   }
-        //   redBox.y -= 30;
-        //   max += 5;
-        //   requestAnimationFrame(redBox.jump);
-        // }
-        // redBox.jump();
+        // e.animate('upAnim');
+        // e.y -= 1;
+        // e.isMoving = true;
+        if(max === 10 || hasReachedMax) return max = 0, hasReachedMax = true;
+        e.y -= 20 * (e.y / 100);
+        max++
       },
       ArrowDown(e) {
         e.animate('downAnim');
-        e.dv = 5;
-        e.y += e.dv;
+        e.y += 8;
         e.isMoving = true;
       },
       ArrowLeft(e) {
         e.animate('leftAnim');
-        e.lv = 5;
-        e.x -= e.lv;
+        e.x -= 8;
         e.isMoving = true;
         e.facingLeft = true;
       },
       ArrowRight(e) {
         e.animate('rightAnim');
-        e.rv = 5;
-        e.x += e.rv;
+        e.x += 8;
         e.isMoving = true;
         e.facingLeft = false;
       },
@@ -203,7 +211,14 @@ const boy = component({
         loop(shoot, 10);
       }
     },
-    onCollision(data) {}
+    onCollision({
+      entity
+    }) {
+      entity.name === 'enemy' && (this.canJump = true);
+      entity.name === 'ground' && (this.canJump = true);
+      hasReachedMax = false;
+      max = 0;
+    }
   }
 });
 const shoot = () => bullet(boy).facingLeft = boy.facingLeft;
@@ -220,7 +235,8 @@ const enemy = () =>
     props: {
       name: 'enemy',
       mass: 10,
-      color: 'red',
+      // color: 'rgba(200, 20, 100, 0.5)',
+      color: 'orange',
       static: true,
       x: undefined,
       y: undefined,
@@ -243,41 +259,55 @@ const enemy = () =>
       rigidBody: true
     },
     states: {
-      default() {
-        this.isHit ?
-          (this.color = 'red') :
-          (this.color = 'yellow');
-        this.isHit = false;
-        // this.x -= this.lv;
-        // if (this.y >= 600) {
-        //   this.r = false;
-        //   this.uv = 10;
-        // } else if (this.y <= 100) {
-        //   this.r = true;
-        //   this.dv = 10;
-        // }
-        // console.log(this.dv)
-        // this.r ? (this.y += this.dv) : (this.y -= this.uv);
+      default () {
+        // this.color = this.isHit ? 'red' : this.color;
+        // this.isHit = false;
+
+        if (this.name !== 'ground') {
+          if (this.y >= 400) {
+            this.r = false;
+            this.uv = 5;
+          } else if (this.y <= 100) {
+            this.r = true;
+            this.dv = 5;
+          }
+          this.r ? (this.y += this.dv) : (this.y -= this.uv);
+        }
       },
       onCollision(data) {}
     }
   });
 const block4 = enemy();
-block4.y = 90;
-block4.x = 300;
+block4.y = 100;
+block4.x = 200;
 block4.w = 100;
 block4.h = 50;
-const block3 = enemy();
-block3.y = 100;
-block3.x = 500;
-block3.w = 100;
-block3.h = 50;
+
 const block5 = enemy();
-block5.y = 100;
-block5.x = 700;
+block5.y = 400;
+block5.x = 400;
 block5.w = 100;
 block5.h = 50;
 
-initScene(0, 0, 1000, 790, {
-  color: "grey"
+const block3 = enemy();
+block3.y = 100;
+block3.x = 600;
+block3.w = 100;
+block3.h = 50;
+
+const block6 = enemy();
+block6.name = 'ground';
+block6.color = 'brown';
+block6.reactsWith = {
+  ...block6.reactsWith,
+  bullet: false,
+  enemy: false
+};
+block6.y = 550;
+block6.x = 0;
+block6.w = 1000;
+block6.h = 50;
+
+initScene(0, 0, 1000, 600, {
+  color: "rgb(153, 217, 234)"
 });

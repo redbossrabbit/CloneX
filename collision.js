@@ -27,7 +27,7 @@ export const resolveCollision = (currentComponent) => {
             othersYPos < exceptYPos + exceptHeight) {
 
             let collisionData = {
-                entitiy: otherComponent
+                entity: otherComponent
             };
 
             if (otherComponent.rigidBody && currentComponent.reactsWith[otherComponent.name]) {
