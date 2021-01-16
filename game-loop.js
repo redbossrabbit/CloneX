@@ -12,7 +12,8 @@ import {
 } from './collision.js';
 import {
   loop,
-  loopCommands
+  loopCommands,
+  remove
 } from './helper-functions.js';
 import {
   getKeyState
@@ -28,17 +29,12 @@ setInterval(() => {
   frame = 0;
 }, 1000);
 
-const toBeRemoved = [];
-const remove = component => {
-  delete allComponentData[component.id];
-  renderCommands.splice(renderCommands.indexOf(component.render), 1);
-};
 
-let g = 20;
-const gravity = component => (component.y += component.y / 30);
+
+const gravity = component => (component.y += component.y / 20);
 
 const img = document.createElement("img");
-  img.setAttribute("src", './assets/img/land.jpg');
+img.setAttribute("src", './assets/img/land.jpg');
 
 export const initScene = (xcor, ycor, width, height, obj) => {
   scene.width = width;
@@ -70,23 +66,22 @@ export const initScene = (xcor, ycor, width, height, obj) => {
     // game.drawImage(img, 0, 0, width, height);
 
     for (let i = 0; i < renderCommands.length; i++) {
-      renderCommands[i]();
-    }
-    Object.keys(allComponentData).forEach(component => {
-      const currentComponent = allComponentData[component];
+      const currentComponent = renderCommands[i]();
 
       currentComponent.gravity && gravity(currentComponent)
       currentComponent.default && currentComponent.default();
-
 
       currentComponent.controls &&
         Object.keys(currentComponent.controls).forEach(e => {
           keyboardVals[e] && currentComponent.controls[e](currentComponent);
         });
+    }
 
+    Object.keys(allComponentData).forEach(component => {
+      const currentComponent = allComponentData[component];
+      
       resolveCollision(currentComponent);
 
-      currentComponent.gravity && gravity(currentComponent);
       (currentComponent.y > height ||
         currentComponent.y < 0 ||
         currentComponent.x > width ||
@@ -136,7 +131,8 @@ const {
   ['log']: l
 } = console;
 
-let max = 0, hasReachedMax = true;
+let max = 0,
+  hasReachedMax = true;
 
 const boy = component({
   props: {
@@ -186,8 +182,8 @@ const boy = component({
         // e.animate('upAnim');
         // e.y -= 1;
         // e.isMoving = true;
-        if(max === 10 || hasReachedMax) return max = 0, hasReachedMax = true;
-        e.y -= 20 * (e.y / 100);
+        if (max === 20 || hasReachedMax) return max = 0, hasReachedMax = true;
+        e.y -= 10 * (e.y / 100);
         max++
       },
       ArrowDown(e) {
