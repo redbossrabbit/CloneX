@@ -29,8 +29,6 @@ setInterval(() => {
   frame = 0;
 }, 1000);
 
-
-
 const gravity = component => (component.y += component.y / 20);
 
 const img = document.createElement("img");
@@ -79,7 +77,7 @@ export const initScene = (xcor, ycor, width, height, obj) => {
 
     Object.keys(allComponentData).forEach(component => {
       const currentComponent = allComponentData[component];
-      
+
       resolveCollision(currentComponent);
 
       (currentComponent.y > height ||
@@ -170,10 +168,9 @@ const boy = component({
   },
   states: {
     default () {
-      // hasReachedMax = true;
-      this.isColliding = false;
       !this.isMoving && this.animate('idle');
       this.isMoving = false;
+
       if (this.x < 10) this.x = 10;
       else if (this.x > 950) this.x = 950;
     },
@@ -207,11 +204,7 @@ const boy = component({
         loop(shoot, 10);
       }
     },
-    onCollision({
-      entity
-    }) {
-      entity.name === 'enemy' && (this.canJump = true);
-      entity.name === 'ground' && (this.canJump = true);
+    onCollision() {
       hasReachedMax = false;
       max = 0;
     }
@@ -259,7 +252,7 @@ const enemy = () =>
         // this.color = this.isHit ? 'red' : this.color;
         // this.isHit = false;
 
-        if (this.name !== 'ground') {
+        if (this.name !== 'ground' && this.name !== 'block') {
           if (this.y >= 400) {
             this.r = false;
             this.uv = 5;
@@ -285,11 +278,12 @@ block5.x = 400;
 block5.w = 100;
 block5.h = 50;
 
-const block3 = enemy();
-block3.y = 100;
-block3.x = 600;
-block3.w = 100;
-block3.h = 50;
+// const block3 = enemy();
+// block3.y = 100;
+// block3.x = 600;
+// block3.w = 100;
+// block3.h = 50;
+
 
 const block6 = enemy();
 block6.name = 'ground';
@@ -303,6 +297,13 @@ block6.y = 550;
 block6.x = 0;
 block6.w = 1000;
 block6.h = 50;
+
+const block7 = enemy();
+block7.name = 'block'
+block7.y = 150;
+block7.x = 700;
+block7.w = 200;
+block7.h = 400;
 
 initScene(0, 0, 1000, 600, {
   color: "rgb(153, 217, 234)"
