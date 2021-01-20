@@ -63,6 +63,7 @@ export const initScene = (xcor, ycor, width, height, obj) => {
 
     // game.drawImage(img, 0, 0, width, height);
 
+    /**@render render all components */
     for (let i = 0; i < renderCommands.length; i++) {
       const currentComponent = renderCommands[i]();
 
@@ -75,6 +76,7 @@ export const initScene = (xcor, ycor, width, height, obj) => {
         });
     }
 
+    /**@resolve collisions */
     Object.keys(allComponentData).forEach(component => {
       const currentComponent = allComponentData[component];
 
@@ -146,7 +148,8 @@ const boy = component({
     gravity: true,
     // canCollide: true,
     reactsWith: {
-      enemy: true
+      enemy: true,
+      ground: true
     },
     animations: {
       spriteSheet: "./assets/img/sprite-sheet.png",
@@ -181,7 +184,7 @@ const boy = component({
         // e.isMoving = true;
         if (max === 20 || hasReachedMax) return max = 0, hasReachedMax = true;
         e.y -= 10 * (e.y / 100);
-        max++
+          max++;
       },
       ArrowDown(e) {
         e.animate('downAnim');
@@ -204,9 +207,13 @@ const boy = component({
         loop(shoot, 10);
       }
     },
-    onCollision() {
-      hasReachedMax = false;
-      max = 0;
+    onCollision({
+      atTop
+    }) {
+      if (atTop) {
+        hasReachedMax = false;
+        max = 0;
+      }
     }
   }
 });

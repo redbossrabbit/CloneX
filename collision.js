@@ -48,6 +48,7 @@ export const resolveCollision = (currentComponent) => {
                                 otherComponent.x += xD;
                                 resolveCollision(otherComponent);
                             }
+                            collisionData.atLeft = true;
                             //at left
                         } else {
                             if (currentComponent.static) {
@@ -58,6 +59,7 @@ export const resolveCollision = (currentComponent) => {
                                 otherComponent.y += yD;
                                 resolveCollision(otherComponent);
                             }
+                            collisionData.atTop = true;
                             //at top
                         }
                     } else {
@@ -73,6 +75,7 @@ export const resolveCollision = (currentComponent) => {
                                 otherComponent.x += xD;
                                 resolveCollision(otherComponent);
                             }
+                            collisionData.atLeft = true;
                             //at left
                         } else {
                             if (currentComponent.static) {
@@ -83,6 +86,7 @@ export const resolveCollision = (currentComponent) => {
                                 otherComponent.y -= yD;
                                 resolveCollision(otherComponent);
                             }
+                            collisionData.atBottom = true;
                             //at bottom
                         }
                     }
@@ -103,6 +107,7 @@ export const resolveCollision = (currentComponent) => {
                                 otherComponent.x -= xD;
                                 resolveCollision(otherComponent);
                             }
+                            collisionData.atRight = true;
                             //at right
                         } else {
                             if (currentComponent.static) {
@@ -113,6 +118,7 @@ export const resolveCollision = (currentComponent) => {
                                 otherComponent.y += yD;
                                 resolveCollision(otherComponent);
                             }
+                            collisionData.atTop = true;
                             //at top
                         }
                     } else {
@@ -128,6 +134,7 @@ export const resolveCollision = (currentComponent) => {
                                 otherComponent.x -= xD;
                                 resolveCollision(otherComponent);
                             }
+                            collisionData.atRight = true;
                             //at right
                         } else {
                             if (currentComponent.static) {
@@ -138,6 +145,7 @@ export const resolveCollision = (currentComponent) => {
                                 otherComponent.y -= yD;
                                 resolveCollision(otherComponent);
                             }
+                            collisionData.atBottom = true;
                             //at bottom
                         }
                     }

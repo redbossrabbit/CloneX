@@ -10,27 +10,27 @@ export const setAnimation = (component) => {
     anim: {}
   };
 
-  /**
-  * animation data:
-  - X,Y positions for where to start the animation.
-  -How many frames.
-  */
-
   //Preload Image
   const img = document.createElement("img");
   img.setAttribute("src", component.animations.spriteSheet);
   component.animations.spriteSheet = img;
 
-  //Animation player
+  /**
+   * @method play - the animation player
+   */
   component.play = () => {
     const {
       animData,
       animations
-    } = component, {
+    } = component;
+
+    const {
       speed,
       frameWidth,
       frameHeight
-    } = animations, {
+    } = animations;
+
+    const {
       limit,
       xOrigin,
       yOrigin,
@@ -38,7 +38,7 @@ export const setAnimation = (component) => {
     } = animData;
 
     if (component.updateTime === speed) {
-      //checks how many gameloops before going to next frame of animation
+      //counts gameloops before going to next frame of animation
       component.updateTime = 0;
       if (component.frame === limit) {
         if (!animationOptions.loop) {
@@ -55,16 +55,21 @@ export const setAnimation = (component) => {
     component.updateTime++;
   }
 
-  //animate function sets the animation data in the animData object.
+   /**
+   * @method animate - sets the animation data in the animData object for the animation player to work with
+   */
   component.animate = anim => {
     const {
       animations
-    } = component, {
+    } = component;
+
+    const {
       [anim]: animVar,
       frameWidth,
       frameHeight
-    } = animations,
-    [i0, i1, i2, i3] = animVar;
+    } = animations
+
+    const [i0, i1, i2, i3] = animVar;
 
     if (!component.animData.anim[anim]) {
       component.animData.anim = {};
