@@ -1,25 +1,10 @@
-import {
-  component,
-  allComponentData
-} from './components.js';
-import {
-  renderCommands,
-  game,
-  scene
-} from './render.js';
-import {
-  resolveCollision
-} from './collision.js';
-import {
-  loop,
-  loopCommands,
-  remove
-} from './helper-functions.js';
-import {
-  getKeyState
-} from './animation'
+import { component, allComponentData } from "./components.js";
+import { renderCommands, game, scene } from "./render.js";
+import { resolveCollision } from "./collision.js";
+import { loop, loopCommands, remove } from "./helper-functions.js";
+import { getKeyState } from "./animation";
 
-const frameRateTxt = document.getElementById('frame-rate');
+const frameRateTxt = document.getElementById("frame-rate");
 
 const keyboardVals = {};
 
@@ -32,7 +17,7 @@ setInterval(() => {
 const gravity = component => (component.y += component.y / 20);
 
 const img = document.createElement("img");
-img.setAttribute("src", './assets/img/land.jpg');
+img.setAttribute("src", "./assets/img/land.jpg");
 
 export const initScene = (xcor, ycor, width, height, obj) => {
   scene.width = width;
@@ -67,7 +52,7 @@ export const initScene = (xcor, ycor, width, height, obj) => {
     for (let i = 0; i < renderCommands.length; i++) {
       const currentComponent = renderCommands[i]();
 
-      currentComponent.gravity && gravity(currentComponent)
+      currentComponent.gravity && gravity(currentComponent);
       currentComponent.default && currentComponent.default();
 
       currentComponent.controls &&
@@ -86,8 +71,8 @@ export const initScene = (xcor, ycor, width, height, obj) => {
         currentComponent.y < 0 ||
         currentComponent.x > width ||
         currentComponent.x < 0) &&
-      remove(currentComponent);
-    })
+        remove(currentComponent);
+    });
     for (const e of loopCommands.values()) {
       e[1]++;
     }
@@ -115,21 +100,17 @@ const bullet = e =>
       reactsWith: {}
     },
     states: {
-      default () {
+      default() {
         !this.facingLeft ? (this.x += 10) : (this.x -= 10);
       },
-      onCollision({
-        entity
-      }) {
+      onCollision({ entity }) {
         // entity.isHit = true;
         remove(this);
       }
     }
   });
 
-const {
-  ['log']: l
-} = console;
+const { ["log"]: l } = console;
 
 let max = 0,
   hasReachedMax = true;
@@ -164,14 +145,19 @@ const boy = component({
       rightAnim: [3, 0, 4],
       leftAnim: [2, 0, 4],
       upAnim: [1, 0, 4],
-      idle: [0, 0, 1, {
-        still: true
-      }]
-    },
+      idle: [
+        0,
+        0,
+        1,
+        {
+          still: true
+        }
+      ]
+    }
   },
   states: {
-    default () {
-      !this.isMoving && this.animate('idle');
+    default() {
+      !this.isMoving && this.animate("idle");
       this.isMoving = false;
 
       if (this.x < 10) this.x = 10;
@@ -182,23 +168,24 @@ const boy = component({
         // e.animate('upAnim');
         // e.y -= 1;
         // e.isMoving = true;
-        if (max === 20 || hasReachedMax) return max = 0, hasReachedMax = true;
+        if (max === 20 || hasReachedMax)
+          return (max = 0), (hasReachedMax = true);
         e.y -= 10 * (e.y / 100);
-          max++;
+        max++;
       },
       ArrowDown(e) {
-        e.animate('downAnim');
+        e.animate("downAnim");
         e.y += 8;
         e.isMoving = true;
       },
       ArrowLeft(e) {
-        e.animate('leftAnim');
+        e.animate("leftAnim");
         e.x -= 8;
         e.isMoving = true;
         e.facingLeft = true;
       },
       ArrowRight(e) {
-        e.animate('rightAnim');
+        e.animate("rightAnim");
         e.x += 8;
         e.isMoving = true;
         e.facingLeft = false;
@@ -207,32 +194,31 @@ const boy = component({
         loop(shoot, 10);
       }
     },
-    onCollision({
-      atTop
-    }) {
-      if (atTop) {
-        hasReachedMax = false;
-        max = 0;
-      }
+    onCollision({ atTop }) {
+      // if (atTop) {
+
+      // }
+      hasReachedMax = false;
+      max = 0;
     }
   }
 });
-const shoot = () => bullet(boy).facingLeft = boy.facingLeft;
+const shoot = () => (bullet(boy).facingLeft = boy.facingLeft);
 
 // document.addEventListener('keyup', e => {
 //   redBox.animate('idle');
 // })
 
 /**
- * @param 
+ * @param
  */
 const enemy = () =>
   component({
     props: {
-      name: 'enemy',
+      name: "enemy",
       mass: 10,
       // color: 'rgba(200, 20, 100, 0.5)',
-      color: 'orange',
+      color: "orange",
       static: true,
       x: undefined,
       y: undefined,
@@ -250,40 +236,49 @@ const enemy = () =>
       reactsWith: {
         enemy: true,
         boy: true,
-        bullet: true
+        bullet: true,
+        ground: true,
+        block: true
       },
       rigidBody: true
     },
     states: {
-      default () {
+      default() {
         // this.color = this.isHit ? 'red' : this.color;
         // this.isHit = false;
-
-        if (this.name !== 'ground' && this.name !== 'block') {
-          if (this.y >= 400) {
-            this.r = false;
-            this.uv = 5;
-          } else if (this.y <= 100) {
-            this.r = true;
-            this.dv = 5;
-          }
-          this.r ? (this.y += this.dv) : (this.y -= this.uv);
-        }
+        // if (this.name !== 'ground' && this.name !== 'block') {
+        //   if (this.y >= 400) {
+        //     this.r = false;
+        //     this.uv = 5;
+        //   } else if (this.y <= 100) {
+        //     this.r = true;
+        //     this.dv = 5;
+        //   }
+        //   this.r ? (this.y += this.dv) : (this.y -= this.uv);
+        // }
       },
       onCollision(data) {}
     }
   });
 const block4 = enemy();
-block4.y = 100;
-block4.x = 200;
-block4.w = 100;
+block4.y = 200;
+block4.x = 300;
+block4.w = 200;
 block4.h = 50;
 
 const block5 = enemy();
 block5.y = 400;
-block5.x = 400;
-block5.w = 100;
+block5.x = 300;
+block5.w = 200;
 block5.h = 50;
+
+const block8 = enemy();
+block8.static = false;
+block8.gravity = true;
+block8.y = 200;
+block8.x = 350;
+block8.w = 50;
+block8.h = 50;
 
 // const block3 = enemy();
 // block3.y = 100;
@@ -291,22 +286,16 @@ block5.h = 50;
 // block3.w = 100;
 // block3.h = 50;
 
-
 const block6 = enemy();
-block6.name = 'ground';
-block6.color = 'brown';
-block6.reactsWith = {
-  ...block6.reactsWith,
-  bullet: false,
-  enemy: false
-};
+block6.name = "ground";
+block6.color = "brown";
 block6.y = 550;
 block6.x = 0;
 block6.w = 1000;
 block6.h = 50;
 
 const block7 = enemy();
-block7.name = 'block'
+block7.name = "block";
 block7.y = 150;
 block7.x = 700;
 block7.w = 200;

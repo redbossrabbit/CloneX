@@ -1,9 +1,7 @@
 let keyIsDown = true,
-  {
-    ['log']: l
-  } = console;
+  { ["log"]: l } = console;
 
-export const setAnimation = (component) => {
+export const setAnimation = component => {
   component.frame = 1;
   component.updateTime = 0;
   component.animData = {
@@ -19,23 +17,11 @@ export const setAnimation = (component) => {
    * @method play - the animation player
    */
   component.play = () => {
-    const {
-      animData,
-      animations
-    } = component;
+    const { animData, animations } = component;
 
-    const {
-      speed,
-      frameWidth,
-      frameHeight
-    } = animations;
+    const { speed, frameWidth, frameHeight } = animations;
 
-    const {
-      limit,
-      xOrigin,
-      yOrigin,
-      animationOptions
-    } = animData;
+    const { limit, xOrigin, yOrigin, animationOptions } = animData;
 
     if (component.updateTime === speed) {
       //counts gameloops before going to next frame of animation
@@ -45,7 +31,7 @@ export const setAnimation = (component) => {
           component.animations.y = frameHeight * yOrigin;
           component.animations.x = xOrigin;
         }
-        component.frame = 1;
+        component.frame = 0;
       }
       if (!animationOptions.still) {
         component.animations.x = (component.frame + xOrigin) * frameWidth;
@@ -53,21 +39,15 @@ export const setAnimation = (component) => {
       }
     }
     component.updateTime++;
-  }
+  };
 
-   /**
+  /**
    * @method animate - sets the animation data in the animData object for the animation player to work with
    */
   component.animate = anim => {
-    const {
-      animations
-    } = component;
+    const { animations } = component;
 
-    const {
-      [anim]: animVar,
-      frameWidth,
-      frameHeight
-    } = animations
+    const { [anim]: animVar, frameWidth, frameHeight } = animations;
 
     const [i0, i1, i2, i3] = animVar;
 
@@ -86,6 +66,6 @@ export const setAnimation = (component) => {
       component.animations.y = frameHeight * i0;
       component.animations.x = frameWidth * i1;
     }
-  }
-}
-export const getKeyState = (val) => keyIsDown = val;
+  };
+};
+export const getKeyState = val => (keyIsDown = val);
