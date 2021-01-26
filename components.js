@@ -1,6 +1,6 @@
 import { setAnimation } from "./animation.js";
 import { renderCommands, render } from "./render.js";
-let id = 0;
+import { GRAVITY } from "./game-loop.js";
 export const allComponentData = {};
 class Component {
   constructor(obj) {
@@ -11,17 +11,17 @@ class Component {
       this[key] = obj.states[key];
     }
 
-    this.id = id;
+    this.GRAVITY = GRAVITY;
+    this.id = renderCommands.length;
 
     if (this.animations) {
       setAnimation(this);
     }
 
-    allComponentData[id] = this;
+    allComponentData[this.id] = this;
 
     this.render = () => render(this);
     renderCommands.push(this.render);
-    id++;
   }
 }
 export const component = obj => new Component(obj);

@@ -14,10 +14,16 @@ setInterval(() => {
   frame = 0;
 }, 1000);
 
-const gravity = component => (component.y += component.y / 20);
+export const GRAVITY = 10;
+const gravity = component => {
+  component.y += component.GRAVITY += component.GRAVITY * 0.01;
+};
 
 const img = document.createElement("img");
 img.setAttribute("src", "./assets/img/land.jpg");
+
+let max = 0,
+  hasReachedMax = true;
 
 export const initScene = (xcor, ycor, width, height, obj) => {
   scene.width = width;
@@ -67,10 +73,11 @@ export const initScene = (xcor, ycor, width, height, obj) => {
 
       resolveCollision(currentComponent);
 
-      (currentComponent.y > height ||
-        currentComponent.y < 0 ||
-        currentComponent.x > width ||
-        currentComponent.x < 0) &&
+      currentComponent &&
+        (currentComponent.y > height ||
+          currentComponent.y < 0 ||
+          currentComponent.x > width ||
+          currentComponent.x < 0) &&
         remove(currentComponent);
     });
     for (const e of loopCommands.values()) {
@@ -103,17 +110,9 @@ const bullet = e =>
       default() {
         !this.facingLeft ? (this.x += 10) : (this.x -= 10);
       },
-      onCollision({ entity }) {
-        // entity.isHit = true;
-        remove(this);
-      }
+      onCollision({ entity }) {}
     }
   });
-
-const { ["log"]: l } = console;
-
-let max = 0,
-  hasReachedMax = true;
 
 const boy = component({
   props: {
@@ -168,8 +167,11 @@ const boy = component({
         // e.animate('upAnim');
         // e.y -= 1;
         // e.isMoving = true;
-        if (max === 20 || hasReachedMax)
-          return (max = 0), (hasReachedMax = true);
+        if (max === 20 || hasReachedMax) {
+          hasReachedMax = true;
+          max = 0;
+          return;
+        }
         e.y -= 10 * (e.y / 100);
         max++;
       },
@@ -194,12 +196,11 @@ const boy = component({
         loop(shoot, 10);
       }
     },
-    onCollision({ atTop }) {
-      // if (atTop) {
-
-      // }
-      hasReachedMax = false;
-      max = 0;
+    onCollision({ atTop, entity }) {
+      if (atTop) {
+        hasReachedMax = false;
+        max = 0;
+      }
     }
   }
 });
@@ -257,17 +258,22 @@ const enemy = () =>
         //   this.r ? (this.y += this.dv) : (this.y -= this.uv);
         // }
       },
-      onCollision(data) {}
+      onCollision({ entity }) {
+        if (entity.name === "bullet") {
+          this.x += 5;
+          remove(entity);
+        }
+      }
     }
   });
 const block4 = enemy();
-block4.y = 200;
+block4.y = 100;
 block4.x = 300;
 block4.w = 200;
 block4.h = 50;
 
 const block5 = enemy();
-block5.y = 400;
+block5.y = 300;
 block5.x = 300;
 block5.w = 200;
 block5.h = 50;
@@ -275,10 +281,25 @@ block5.h = 50;
 const block8 = enemy();
 block8.static = false;
 block8.gravity = true;
+block8.color = "blue";
+// block8.default = () => {
+//   console.log(block8.GRAVITY);
+// };
 block8.y = 200;
 block8.x = 350;
 block8.w = 50;
 block8.h = 50;
+const block9 = enemy();
+block9.static = false;
+block9.gravity = true;
+block9.color = "blue";
+// block8.default = () => {
+//   console.log(block8.GRAVITY);
+// };
+block9.y = 200;
+block9.x = 450;
+block9.w = 50;
+block9.h = 50;
 
 // const block3 = enemy();
 // block3.y = 100;

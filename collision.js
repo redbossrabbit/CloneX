@@ -1,5 +1,7 @@
 import { allComponentData } from "./components.js";
+import { GRAVITY } from "./game-loop.js";
 export const resolveCollision = currentComponent => {
+  if (!currentComponent) return;
   const { [currentComponent.id]: except, ...others } = allComponentData,
     othersArr = Object.keys(others);
 
@@ -24,7 +26,6 @@ export const resolveCollision = currentComponent => {
       let collisionData = {
         entity: otherComponent
       };
-
       if (
         otherComponent.rigidBody &&
         currentComponent.reactsWith[otherComponent.name]
@@ -40,8 +41,10 @@ export const resolveCollision = currentComponent => {
             if (xD < yD) {
               if (currentComponent.static) {
                 otherComponent.x += xD;
+                resolveCollision(otherComponent);
               } else if (otherComponent.static) {
                 currentComponent.x -= xD;
+                resolveCollision(currentComponent);
               } else {
                 otherComponent.x += xD;
                 resolveCollision(otherComponent);
@@ -49,10 +52,13 @@ export const resolveCollision = currentComponent => {
               collisionData.atLeft = true;
               //at left
             } else {
+              currentComponent.GRAVITY = GRAVITY;
               if (currentComponent.static) {
                 otherComponent.y += yD;
+                resolveCollision(otherComponent);
               } else if (otherComponent.static) {
                 currentComponent.y -= yD;
+                resolveCollision(currentComponent);
               } else {
                 otherComponent.y += yD;
                 resolveCollision(otherComponent);
@@ -67,8 +73,10 @@ export const resolveCollision = currentComponent => {
             if (xD < yD) {
               if (currentComponent.static) {
                 otherComponent.x += xD;
+                resolveCollision(otherComponent);
               } else if (otherComponent.static) {
                 currentComponent.x -= xD;
+                resolveCollision(currentComponent);
               } else {
                 otherComponent.x += xD;
                 resolveCollision(otherComponent);
@@ -76,10 +84,13 @@ export const resolveCollision = currentComponent => {
               collisionData.atLeft = true;
               //at left
             } else {
+              otherComponent.GRAVITY = GRAVITY;
               if (currentComponent.static) {
                 otherComponent.y -= yD;
+                resolveCollision(otherComponent);
               } else if (otherComponent.static) {
                 currentComponent.y += yD;
+                resolveCollision(currentComponent);
               } else {
                 otherComponent.y -= yD;
                 resolveCollision(otherComponent);
@@ -99,8 +110,10 @@ export const resolveCollision = currentComponent => {
             if (xD < yD) {
               if (currentComponent.static) {
                 otherComponent.x -= xD;
+                resolveCollision(otherComponent);
               } else if (otherComponent.static) {
                 currentComponent.x += xD;
+                resolveCollision(currentComponent);
               } else {
                 otherComponent.x -= xD;
                 resolveCollision(otherComponent);
@@ -108,10 +121,13 @@ export const resolveCollision = currentComponent => {
               collisionData.atRight = true;
               //at right
             } else {
+              currentComponent.GRAVITY = GRAVITY;
               if (currentComponent.static) {
                 otherComponent.y += yD;
+                resolveCollision(otherComponent);
               } else if (otherComponent.static) {
                 currentComponent.y -= yD;
+                resolveCollision(currentComponent);
               } else {
                 otherComponent.y += yD;
                 resolveCollision(otherComponent);
@@ -126,8 +142,10 @@ export const resolveCollision = currentComponent => {
             if (xD < yD) {
               if (currentComponent.static) {
                 otherComponent.x -= xD;
+                resolveCollision(otherComponent);
               } else if (otherComponent.static) {
                 currentComponent.x += xD;
+                resolveCollision(currentComponent);
               } else {
                 otherComponent.x -= xD;
                 resolveCollision(otherComponent);
@@ -135,10 +153,13 @@ export const resolveCollision = currentComponent => {
               collisionData.atRight = true;
               //at right
             } else {
+              otherComponent.GRAVITY = GRAVITY;
               if (currentComponent.static) {
                 otherComponent.y -= yD;
+                resolveCollision(otherComponent);
               } else if (otherComponent.static) {
                 currentComponent.y += yD;
+                resolveCollision(currentComponent);
               } else {
                 otherComponent.y -= yD;
                 resolveCollision(otherComponent);
