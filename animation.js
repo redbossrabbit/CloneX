@@ -49,7 +49,7 @@ export const setAnimation = component => {
 
     const { [anim]: animVar, frameWidth, frameHeight } = animations;
 
-    const [i0, i1, i2, i3] = animVar;
+    const [xcor, ycor, frameAmt, options] = animVar;
 
     if (!component.animData.anim[anim]) {
       component.animData.anim = {};
@@ -57,14 +57,14 @@ export const setAnimation = component => {
       component.frame = 1;
       component.updateTime = 0;
 
-      component.animData.yOrigin = i0;
-      component.animData.xOrigin = i1;
-      component.animData.limit = i2;
+      component.animData.yOrigin = xcor;
+      component.animData.xOrigin = ycor;
+      component.animData.limit = frameAmt;
       component.animData.animationOptions = {
-        ...i3
+        ...options
       };
-      component.animations.y = frameHeight * i0;
-      component.animations.x = frameWidth * i1;
+      component.animations.y = frameHeight * xcor;
+      component.animations.x = frameWidth * ycor;
     }
   };
 };

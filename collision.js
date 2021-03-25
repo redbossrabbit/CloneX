@@ -23,6 +23,7 @@ export const resolveCollision = currentComponent => {
       exceptYPos < othersYPos + othersHeight &&
       othersYPos < exceptYPos + exceptHeight
     ) {
+      // currentComponent.name === "bullet" && console.log("a");
       let collisionData = {
         entity: otherComponent
       };

@@ -2,6 +2,7 @@ import { setAnimation } from "./animation.js";
 import { renderCommands, render } from "./render.js";
 import { GRAVITY } from "./game-loop.js";
 export const allComponentData = {};
+let id = 0;
 class Component {
   constructor(obj) {
     for (const key in obj.props) {
@@ -12,12 +13,14 @@ class Component {
     }
 
     this.GRAVITY = GRAVITY;
-    this.id = renderCommands.length;
+    this.id = id++;
 
     if (this.animations) {
       setAnimation(this);
     }
-
+    if (this.camera) {
+      this.camera = this.camera(this);
+    }
     allComponentData[this.id] = this;
 
     this.render = () => render(this);
