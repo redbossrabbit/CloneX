@@ -58,9 +58,11 @@ export const initScene = (xcor, ycor, width, height, obj) => {
 
     // game.drawImage(img, 0, 0, width, height);
 
-    /**@render render all components */
-    for (let i = 0; i < renderCommands.length; i++) {
-      const currentComponent = renderCommands[i]();
+    const all = Object.keys(allComponentData);
+
+    /**@initialize get defaults for all components */
+    all.forEach(component => {
+      const currentComponent = allComponentData[component];
 
       currentComponent.gravity && gravity(currentComponent);
 
@@ -68,22 +70,27 @@ export const initScene = (xcor, ycor, width, height, obj) => {
         Object.keys(currentComponent.controls).forEach(e => {
           keyboardVals[e] && currentComponent.controls[e](currentComponent);
         });
-    }
+    });
 
     /**@resolve collisions */
-    Object.keys(allComponentData).forEach(component => {
+    all.forEach(component => {
       const currentComponent = allComponentData[component];
 
       resolveCollision(currentComponent);
 
+      currentComponent.default && currentComponent.default();
       // currentComponent &&
       //   (currentComponent.y > height ||
       //     currentComponent.y < 0 ||
       //     currentComponent.x > width ||
       //     currentComponent.x < 0) &&
       //   remove(currentComponent);
-      currentComponent.default && currentComponent.default();
     });
+
+    /**@render render all components */
+    for (let i = 0; i < renderCommands.length; i++) {
+      renderCommands[i]();
+    }
 
     for (const e of loopCommands.values()) {
       e[1]++;
@@ -172,7 +179,7 @@ const boy = component({
     default() {
       !this.isMoving && this.animate("idle");
       this.isMoving = false;
-
+      // this.x -= 3;
       // if (this.x < 10) this.x = 10;
       // else if (this.x > 950) this.x = 950;
 
@@ -325,6 +332,9 @@ block9.y = 200;
 block9.x = 450;
 block9.w = 50;
 block9.h = 50;
+// block9.default = () => {
+//   block9.y -= 0.5;
+// };
 
 const block3 = enemy();
 block3.y = 100;

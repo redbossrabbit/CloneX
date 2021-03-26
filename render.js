@@ -23,5 +23,4 @@ export const render = component => {
     );
     component.play();
   }
-  return component;
 };
