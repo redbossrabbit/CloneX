@@ -63,6 +63,7 @@ export const initScene = (xcor, ycor, width, height, obj) => {
     /**@initialize get defaults for all components */
     all.forEach(component => {
       const currentComponent = allComponentData[component];
+      currentComponent.default && currentComponent.default();
 
       currentComponent.gravity && gravity(currentComponent);
 
@@ -78,7 +79,6 @@ export const initScene = (xcor, ycor, width, height, obj) => {
 
       resolveCollision(currentComponent);
 
-      currentComponent.default && currentComponent.default();
       // currentComponent &&
       //   (currentComponent.y > height ||
       //     currentComponent.y < 0 ||
