@@ -1,0 +1,15 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #000;
+  -ms-touch-action: none;
+      touch-action: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+/*# sourceMappingURL=style.css.map */

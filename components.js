@@ -8,6 +8,7 @@ class Component {
     for (const key in obj.props) {
       this[key] = obj.props[key];
     }
+
     for (const key in obj.states) {
       this[key] = obj.states[key];
     }
@@ -18,9 +19,11 @@ class Component {
     if (this.animations) {
       setAnimation(this);
     }
+
     if (this.camera) {
       this.camera = this.camera(this);
     }
+
     allComponentData[this.id] = this;
 
     this.render = () => render(this);

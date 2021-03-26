@@ -54,6 +54,7 @@ export const resolveCollision = currentComponent => {
               //at left
             } else {
               currentComponent.GRAVITY = GRAVITY;
+
               if (currentComponent.static) {
                 otherComponent.y += yD;
                 resolveCollision(otherComponent);
@@ -86,6 +87,7 @@ export const resolveCollision = currentComponent => {
               //at left
             } else {
               otherComponent.GRAVITY = GRAVITY;
+
               if (currentComponent.static) {
                 otherComponent.y -= yD;
                 resolveCollision(otherComponent);

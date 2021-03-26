@@ -24,24 +24,24 @@ export class Camera {
 
       if (focus.x + focus.w > focusX + focusWidth) {
         others.forEach(item => {
-          item.x -= focus.x - focus._PREVIOUS_VALUE_x || 0;
+          item.x -= focus.x - focus._PREVIOUS_VALUE_x;
         });
         focus.x -= focus.x + focus.w - (focusX + focusWidth);
       } else if (focus.x < focusX) {
         others.forEach(item => {
-          item.x += focus._PREVIOUS_VALUE_x || 0 - focus.x;
+          item.x += focus._PREVIOUS_VALUE_x - focus.x;
         });
         focus.x += focusX - focus.x;
       }
 
       if (focus.y + focus.h > focusY + focusHeight) {
         others.forEach(item => {
-          item.y -= focus.y - focus._PREVIOUS_VALUE_y || 0;
+          item.y -= focus.y - focus._PREVIOUS_VALUE_y;
         });
         focus.y -= focus.y + focus.h - (focusY + focusHeight);
       } else if (focus.y < focusY) {
         others.forEach(item => {
-          item.y += focus._PREVIOUS_VALUE_y || 0 - focus.y;
+          item.y += focus._PREVIOUS_VALUE_y - focus.y;
         });
         focus.y += focusY - focus.y;
       }

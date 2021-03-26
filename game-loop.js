@@ -5,15 +5,15 @@ import { loop, loopCommands, remove } from "./helper-functions.js";
 import { getKeyState } from "./animation";
 import { Camera } from "./camera";
 
-const frameRateTxt = document.getElementById("frame-rate");
+// const frameRateTxt = document.getElementById("frame-rate");
 
 const keyboardVals = {};
 
-let frame = 0;
-setInterval(() => {
-  frameRateTxt.innerText = `${frame}fps`;
-  frame = 0;
-}, 1000);
+// let frame = 0;
+// setInterval(() => {
+//   frameRateTxt.innerText = `${frame}fps`;
+//   frame = 0;
+// }, 1000);
 
 export const GRAVITY = 10;
 const gravity = component => {
@@ -53,8 +53,8 @@ export const initScene = (xcor, ycor, width, height, obj) => {
     ctx.clearRect(xcor, ycor, obj.w || width, obj.h || height);
     ctx.fillStyle = obj.color;
     ctx.fillRect(xcor, ycor, width, height);
-    ctx.fillStyle = "green";
-    // ctx.fillRect(10, 10, 120, 120);
+    // ctx.fillStyle = "purple";
+    // ctx.fillRect(500, 300, 120, 120);
 
     // game.drawImage(img, 0, 0, width, height);
 
@@ -62,7 +62,6 @@ export const initScene = (xcor, ycor, width, height, obj) => {
     for (let i = 0; i < renderCommands.length; i++) {
       const currentComponent = renderCommands[i]();
 
-      currentComponent.default && currentComponent.default();
       currentComponent.gravity && gravity(currentComponent);
 
       currentComponent.controls &&
@@ -83,12 +82,13 @@ export const initScene = (xcor, ycor, width, height, obj) => {
       //     currentComponent.x > width ||
       //     currentComponent.x < 0) &&
       //   remove(currentComponent);
+      currentComponent.default && currentComponent.default();
     });
 
     for (const e of loopCommands.values()) {
       e[1]++;
     }
-    frame++;
+    // frame++;
     requestAnimationFrame(gameLoop);
   };
   gameLoop();
@@ -104,7 +104,7 @@ const bullet = e =>
       name: "bullet",
       color: "green",
       // mass: 1,
-      x: !e.facingLeft ? e.x + e.w : e.x - 10,
+      x: !e.facingLeft ? e.x + e.w : e.x - 20,
       y: e.y,
       w: 20,
       h: 20,
@@ -120,7 +120,7 @@ const bullet = e =>
         !this.facingLeft ? (this.x += 10) : (this.x -= 10);
       },
       onCollision({ entity }) {
-        entity.x += 5;
+        // entity.x += 5;
         remove(this);
       }
     }
@@ -132,13 +132,14 @@ const boy = component({
     mass: 1,
     w: 50,
     h: 50,
-    x: 40,
-    y: 20,
+    x: 532,
+    y: 338,
     facingLeft: false,
     rigidBody: true,
     canJump: true,
     // gravity: true,
     static: false,
+    // color: "red",
     hasCollided: true,
     reactsWith: {
       enemy: true,
@@ -180,8 +181,8 @@ const boy = component({
     camera(e) {
       return new Camera({
         focus: e,
-        focusX: 10,
-        focusY: 10,
+        focusX: 500,
+        focusY: 300,
         focusHeight: 120,
         focusWidth: 120
       });
@@ -228,7 +229,7 @@ const boy = component({
         loop(shoot, 10);
       }
     },
-    onCollision({ atTop, atBottom, entity }) {
+    onCollision({ atTop, atBottom }) {
       if (atBottom) {
         this.atBottom = true;
       }
@@ -309,7 +310,7 @@ block4.h = 50;
 
 const block8 = enemy();
 block8.static = false;
-block8.gravity = true;
+// block8.gravity = true;
 block8.color = "blue";
 block8.y = 200;
 block8.x = 350;
@@ -318,7 +319,7 @@ block8.h = 50;
 
 const block9 = enemy();
 block9.static = false;
-block9.gravity = true;
+// block9.gravity = true;
 block9.color = "blue";
 block9.y = 200;
 block9.x = 450;
@@ -346,6 +347,6 @@ block7.x = 700;
 block7.w = 200;
 block7.h = 400;
 
-initScene(0, 0, 1000, 600, {
+initScene(0, 0, window.innerWidth, window.innerHeight, {
   color: "rgb(153, 217, 234)"
 });

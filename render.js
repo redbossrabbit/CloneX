@@ -4,12 +4,10 @@ document.body.append(scene);
 export const ctx = scene.getContext("2d");
 
 export const render = component => {
-  // console.log(component)
-  component.color &&
-    (() => {
-      ctx.fillStyle = component.color;
-      ctx.fillRect(component.x, component.y, component.w, component.h);
-    })();
+  if (component.color) {
+    ctx.fillStyle = component.color;
+    ctx.fillRect(component.x, component.y, component.w, component.h);
+  }
 
   if (component.animations) {
     ctx.drawImage(
