@@ -177,10 +177,7 @@ export const resolveCollision = currentComponent => {
             }
           }
         }
-      } catch {
-        currentComponent.onCollision &&
-          currentComponent.onCollision(collisionData);
-      }
+      } catch {}
       currentComponent.onCollision &&
         currentComponent.onCollision(collisionData);
     }

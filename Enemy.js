@@ -5,7 +5,7 @@ const Enemy = () =>
     props: {
       name: "enemy",
       mass: 1,
-      color: "orange",
+      color: "black",
       static: true,
       gravity: false,
       bounds: {},
@@ -40,7 +40,7 @@ block4.h = 50;
 const block8 = Enemy();
 block8.static = false;
 block8.gravity = true;
-block8.color = "blue";
+block8.color = "brown";
 block8.y = 200;
 block8.x = 350;
 block8.w = 50;
@@ -49,7 +49,7 @@ block8.h = 50;
 const block9 = Enemy();
 block9.static = false;
 block9.gravity = true;
-block9.color = "blue";
+block9.color = "brown";
 block9.y = 200;
 block9.x = 450;
 block9.w = 50;
@@ -69,11 +69,19 @@ blockd.h = 50;
 
 const block6 = Enemy();
 block6.name = "ground";
-block6.color = "brown";
+block6.color = "black";
 block6.y = 550;
 block6.x = 0;
 block6.w = 1000;
 block6.h = 50;
+
+const nextGround = Enemy();
+nextGround.name = "ground";
+nextGround.color = "black";
+nextGround.y = 400;
+nextGround.x = 1100;
+nextGround.w = 1000;
+nextGround.h = 50;
 
 // const createEnemy = (x, y, w, h) => {
 //   const enemy = Enemy();

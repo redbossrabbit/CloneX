@@ -23,8 +23,7 @@ const Boy = component({
     static: false,
     // color: "red",
     reactsWith: {
-      enemy: true,
-      ground: true
+      enemy: true
     },
     _jumpAmt: 1,
     animations: {
@@ -68,7 +67,7 @@ const Boy = component({
           e.gravity = false;
           const id = newTimingFunction();
           interval(() => {
-            if (e._jumpAmt >= 30 || e.atBottom) {
+            if (e._jumpAmt >= 40 || e.atBottom) {
               e._hasJumped = false;
               e.gravity = true;
               clearTimer(id);
@@ -83,7 +82,6 @@ const Boy = component({
       ArrowDown(e, keyDown) {
         if (!keyDown) return;
         e.animate("downAnim");
-        e.y += 5;
         e.isMoving = true;
       },
       ArrowLeft(e, keyDown) {

@@ -14,7 +14,7 @@ const gravity = component => {
 
 const img = document.createElement("img");
 
-img.setAttribute("src", "./assets/img/land.jpg");
+img.setAttribute("src", "./assets/img/bg.jpg");
 
 const InitScene = (xcor, ycor, width, height, obj) => {
   scene.width = width;
@@ -43,7 +43,7 @@ const InitScene = (xcor, ycor, width, height, obj) => {
     // ctx.fillStyle = "purple";
     // ctx.fillRect(500, 300, 120, 120);
 
-    // game.drawImage(img, 0, 0, width, height);
+    ctx.drawImage(img, 0, 0, width, 2000);
 
     const all = Object.keys(allComponentData);
 
