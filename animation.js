@@ -1,6 +1,3 @@
-let keyIsDown = true,
-  { ["log"]: l } = console;
-
 export const setAnimation = component => {
   component.frame = 1;
   component.updateTime = 0;
@@ -33,10 +30,8 @@ export const setAnimation = component => {
         }
         component.frame = 0;
       }
-      if (!animationOptions.still) {
-        component.animations.x = (component.frame + xOrigin) * frameWidth;
-        component.frame++;
-      }
+      component.animations.x = (component.frame + xOrigin) * frameWidth;
+      component.frame++;
     }
     component.updateTime++;
   };
@@ -44,16 +39,15 @@ export const setAnimation = component => {
   /**
    * @method animate - sets the animation data in the animData object for the animation player to work with
    */
-  component.animate = anim => {
+  component.animate = animName => {
     const { animations } = component;
 
-    const { [anim]: animVar, frameWidth, frameHeight } = animations;
+    const { [animName]: animVar, frameWidth, frameHeight } = animations;
 
     const [xcor, ycor, frameAmt, options] = animVar;
 
-    if (!component.animData.anim[anim]) {
-      component.animData.anim = {};
-      component.animData.anim[anim] = true;
+    if (!component.animData.anim[animName]) {
+      component.animData.anim[animName] = true;
       component.frame = 1;
       component.updateTime = 0;
 
@@ -68,4 +62,3 @@ export const setAnimation = component => {
     }
   };
 };
-export const getKeyState = val => (keyIsDown = val);

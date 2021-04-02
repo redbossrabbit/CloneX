@@ -23,27 +23,27 @@ export class Camera {
       others = Object.values(others);
 
       if (focus.x + focus.w > focusX + focusWidth) {
-        others.forEach(item => {
-          item.x -= focus.x - focus._PREVIOUS_VALUE_x;
-        });
         focus.x -= focus.x + focus.w - (focusX + focusWidth);
-      } else if (focus.x < focusX) {
         others.forEach(item => {
-          item.x += focus._PREVIOUS_VALUE_x - focus.x;
+          item.x -= Math.abs(focus.x - focus._PREVIOUS_VALUE_x);
         });
+      } else if (focus.x < focusX) {
         focus.x += focusX - focus.x;
+        others.forEach(item => {
+          item.x += Math.abs(focus._PREVIOUS_VALUE_x - focus.x);
+        });
       }
 
       if (focus.y + focus.h > focusY + focusHeight) {
-        others.forEach(item => {
-          item.y -= focus.y - focus._PREVIOUS_VALUE_y;
-        });
         focus.y -= focus.y + focus.h - (focusY + focusHeight);
-      } else if (focus.y < focusY) {
         others.forEach(item => {
-          item.y += focus._PREVIOUS_VALUE_y - focus.y;
+          item.y -= Math.abs(focus.y - focus._PREVIOUS_VALUE_y);
         });
+      } else if (focus.y < focusY) {
         focus.y += focusY - focus.y;
+        others.forEach(item => {
+          item.y += Math.abs(focus._PREVIOUS_VALUE_y - focus.y);
+        });
       }
     };
     return this;

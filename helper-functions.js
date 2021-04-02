@@ -1,17 +1,23 @@
 import { allComponentData } from "./components.js";
 import { renderCommands } from "./render.js";
 
-export const loopCommands = new Map();
+let id = 0;
+export const loopCommands = {};
 
-export const loop = (func, speed) => {
-  if (!loopCommands.get(func)) {
-    loopCommands.set(func, [func, 0]);
-    func();
-  }
-  if (loopCommands.get(func)[1] >= speed) {
-    func();
-    loopCommands.set(func, [func, 0]);
-  }
+export const newTimingFunction = () => {
+  return (id += 1);
+};
+
+export const clearTimer = id => {
+  delete loopCommands[id];
+};
+
+export const timeout = (func, speed) => {
+  loopCommands[id] = [func, 0, speed, "timeout", id];
+};
+
+export const interval = (func, speed) => {
+  loopCommands[id] = [func, 0, speed, "interval", id];
 };
 
 export const remove = component => {

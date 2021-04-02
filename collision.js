@@ -1,7 +1,9 @@
 import { allComponentData } from "./components.js";
 import { GRAVITY } from "./game-loop.js";
+
 export const resolveCollision = currentComponent => {
   if (!currentComponent) return;
+
   const { [currentComponent.id]: except, ...others } = allComponentData,
     othersArr = Object.keys(others);
 
@@ -27,151 +29,157 @@ export const resolveCollision = currentComponent => {
       let collisionData = {
         entity: otherComponent
       };
-      if (
-        otherComponent.rigidBody &&
-        currentComponent.reactsWith[otherComponent.name]
-      ) {
-        if (exceptXPos < othersXPos) {
-          const xD = exceptXPos + exceptWidth - othersXPos;
-          collisionData.displacementX = xD;
+      try {
+        if (
+          otherComponent.rigidBody &&
+          currentComponent.reactsWith[otherComponent.name]
+        ) {
+          if (exceptXPos < othersXPos) {
+            const xD = exceptXPos + exceptWidth - othersXPos;
+            collisionData.displacementX = xD;
 
-          if (exceptYPos < othersYPos) {
-            const yD = exceptYPos + exceptHeight - othersYPos;
-            collisionData.displacementY = yD;
+            if (exceptYPos < othersYPos) {
+              const yD = exceptYPos + exceptHeight - othersYPos;
+              collisionData.displacementY = yD;
 
-            if (xD < yD) {
-              if (currentComponent.static) {
-                otherComponent.x += xD;
-                resolveCollision(otherComponent);
-              } else if (otherComponent.static) {
-                currentComponent.x -= xD;
-                resolveCollision(currentComponent);
+              if (xD < yD) {
+                if (currentComponent.static) {
+                  otherComponent.x += xD;
+                  resolveCollision(otherComponent);
+                } else if (otherComponent.static) {
+                  currentComponent.x -= xD;
+                  resolveCollision(currentComponent);
+                } else {
+                  otherComponent.x += xD;
+                  resolveCollision(otherComponent);
+                }
+                collisionData.atLeft = true;
+                //at left
               } else {
-                otherComponent.x += xD;
-                resolveCollision(otherComponent);
+                currentComponent.GRAVITY = GRAVITY;
+
+                if (currentComponent.static) {
+                  otherComponent.y += yD;
+                  resolveCollision(otherComponent);
+                } else if (otherComponent.static) {
+                  currentComponent.y -= yD;
+                  resolveCollision(currentComponent);
+                } else {
+                  otherComponent.y += yD;
+                  resolveCollision(otherComponent);
+                }
+                collisionData.atTop = true;
+                //at top
               }
-              collisionData.atLeft = true;
-              //at left
             } else {
-              currentComponent.GRAVITY = GRAVITY;
+              const yD = othersYPos + othersHeight - exceptYPos;
+              collisionData.displacementY = yD;
 
-              if (currentComponent.static) {
-                otherComponent.y += yD;
-                resolveCollision(otherComponent);
-              } else if (otherComponent.static) {
-                currentComponent.y -= yD;
-                resolveCollision(currentComponent);
+              if (xD < yD) {
+                if (currentComponent.static) {
+                  otherComponent.x += xD;
+                  resolveCollision(otherComponent);
+                } else if (otherComponent.static) {
+                  currentComponent.x -= xD;
+                  resolveCollision(currentComponent);
+                } else {
+                  otherComponent.x += xD;
+                  resolveCollision(otherComponent);
+                }
+                collisionData.atLeft = true;
+                //at left
               } else {
-                otherComponent.y += yD;
-                resolveCollision(otherComponent);
+                otherComponent.GRAVITY = GRAVITY;
+
+                if (currentComponent.static) {
+                  otherComponent.y -= yD;
+                  resolveCollision(otherComponent);
+                } else if (otherComponent.static) {
+                  currentComponent.y += yD;
+                  resolveCollision(currentComponent);
+                } else {
+                  otherComponent.y -= yD;
+                  resolveCollision(otherComponent);
+                }
+                collisionData.atBottom = true;
+                //at bottom
               }
-              collisionData.atTop = true;
-              //at top
             }
           } else {
-            const yD = othersYPos + othersHeight - exceptYPos;
-            collisionData.displacementY = yD;
+            const xD = othersXPos + othersWidth - exceptXPos;
+            collisionData.displacementX = xD;
 
-            if (xD < yD) {
-              if (currentComponent.static) {
-                otherComponent.x += xD;
-                resolveCollision(otherComponent);
-              } else if (otherComponent.static) {
-                currentComponent.x -= xD;
-                resolveCollision(currentComponent);
+            if (exceptYPos < othersYPos) {
+              const yD = exceptYPos + exceptHeight - othersYPos;
+              collisionData.displacementY = yD;
+
+              if (xD < yD) {
+                if (currentComponent.static) {
+                  otherComponent.x -= xD;
+                  resolveCollision(otherComponent);
+                } else if (otherComponent.static) {
+                  currentComponent.x += xD;
+                  resolveCollision(currentComponent);
+                } else {
+                  otherComponent.x -= xD;
+                  resolveCollision(otherComponent);
+                }
+                collisionData.atRight = true;
+                //at right
               } else {
-                otherComponent.x += xD;
-                resolveCollision(otherComponent);
+                currentComponent.GRAVITY = GRAVITY;
+
+                if (currentComponent.static) {
+                  otherComponent.y += yD;
+                  resolveCollision(otherComponent);
+                } else if (otherComponent.static) {
+                  currentComponent.y -= yD;
+                  resolveCollision(currentComponent);
+                } else {
+                  otherComponent.y += yD;
+                  resolveCollision(otherComponent);
+                }
+                collisionData.atTop = true;
+                //at top
               }
-              collisionData.atLeft = true;
-              //at left
             } else {
-              otherComponent.GRAVITY = GRAVITY;
+              const yD = othersYPos + othersHeight - exceptYPos;
+              collisionData.displacementY = yD;
 
-              if (currentComponent.static) {
-                otherComponent.y -= yD;
-                resolveCollision(otherComponent);
-              } else if (otherComponent.static) {
-                currentComponent.y += yD;
-                resolveCollision(currentComponent);
+              if (xD < yD) {
+                if (currentComponent.static) {
+                  otherComponent.x -= xD;
+                  resolveCollision(otherComponent);
+                } else if (otherComponent.static) {
+                  currentComponent.x += xD;
+                  resolveCollision(currentComponent);
+                } else {
+                  otherComponent.x -= xD;
+                  resolveCollision(otherComponent);
+                }
+                collisionData.atRight = true;
+                //at right
               } else {
-                otherComponent.y -= yD;
-                resolveCollision(otherComponent);
+                otherComponent.GRAVITY = GRAVITY;
+                if (currentComponent.static) {
+                  otherComponent.y -= yD;
+                  resolveCollision(otherComponent);
+                } else if (otherComponent.static) {
+                  currentComponent.y += yD;
+                  resolveCollision(currentComponent);
+                } else {
+                  otherComponent.y -= yD;
+                  resolveCollision(otherComponent);
+                }
+                collisionData.atBottom = true;
+                //at bottom
               }
-              collisionData.atBottom = true;
-              //at bottom
-            }
-          }
-        } else {
-          const xD = othersXPos + othersWidth - exceptXPos;
-          collisionData.displacementX = xD;
-
-          if (exceptYPos < othersYPos) {
-            const yD = exceptYPos + exceptHeight - othersYPos;
-            collisionData.displacementY = yD;
-
-            if (xD < yD) {
-              if (currentComponent.static) {
-                otherComponent.x -= xD;
-                resolveCollision(otherComponent);
-              } else if (otherComponent.static) {
-                currentComponent.x += xD;
-                resolveCollision(currentComponent);
-              } else {
-                otherComponent.x -= xD;
-                resolveCollision(otherComponent);
-              }
-              collisionData.atRight = true;
-              //at right
-            } else {
-              currentComponent.GRAVITY = GRAVITY;
-              if (currentComponent.static) {
-                otherComponent.y += yD;
-                resolveCollision(otherComponent);
-              } else if (otherComponent.static) {
-                currentComponent.y -= yD;
-                resolveCollision(currentComponent);
-              } else {
-                otherComponent.y += yD;
-                resolveCollision(otherComponent);
-              }
-              collisionData.atTop = true;
-              //at top
-            }
-          } else {
-            const yD = othersYPos + othersHeight - exceptYPos;
-            collisionData.displacementY = yD;
-
-            if (xD < yD) {
-              if (currentComponent.static) {
-                otherComponent.x -= xD;
-                resolveCollision(otherComponent);
-              } else if (otherComponent.static) {
-                currentComponent.x += xD;
-                resolveCollision(currentComponent);
-              } else {
-                otherComponent.x -= xD;
-                resolveCollision(otherComponent);
-              }
-              collisionData.atRight = true;
-              //at right
-            } else {
-              otherComponent.GRAVITY = GRAVITY;
-              if (currentComponent.static) {
-                otherComponent.y -= yD;
-                resolveCollision(otherComponent);
-              } else if (otherComponent.static) {
-                currentComponent.y += yD;
-                resolveCollision(currentComponent);
-              } else {
-                otherComponent.y -= yD;
-                resolveCollision(otherComponent);
-              }
-              collisionData.atBottom = true;
-              //at bottom
             }
           }
         }
+      } catch {
+        currentComponent.onCollision &&
+          currentComponent.onCollision(collisionData);
       }
       currentComponent.onCollision &&
         currentComponent.onCollision(collisionData);

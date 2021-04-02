@@ -1,8 +1,11 @@
 import { setAnimation } from "./animation.js";
 import { renderCommands, render } from "./render.js";
 import { GRAVITY } from "./game-loop.js";
+
 export const allComponentData = {};
+
 let id = 0;
+
 class Component {
   constructor(obj) {
     for (const key in obj.props) {
@@ -30,4 +33,5 @@ class Component {
     renderCommands.push(this.render);
   }
 }
+
 export const component = obj => new Component(obj);
