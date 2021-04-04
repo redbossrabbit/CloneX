@@ -43,17 +43,17 @@ export const resolveCollision = currentComponent => {
 
               if (xD < yD) {
                 if (currentComponent.static) {
-                  otherComponent.setX(e => (e.x += xD));
+                  otherComponent.setX(xD);
                   resolveCollision(otherComponent);
                 } else if (otherComponent.static) {
-                  currentComponent.setX(e => (e.x -= xD));
+                  currentComponent.setX(-xD);
                   resolveCollision(currentComponent);
                 } else {
                   if (currentComponent.IS_MOVING_X) {
-                    otherComponent.setX(e => (e.x += xD));
+                    otherComponent.setX(xD);
                     resolveCollision(otherComponent);
                   } else if (otherComponent.IS_MOVING_X) {
-                    currentComponent.setX(e => (e.x -= xD));
+                    currentComponent.setX(-xD);
                     resolveCollision(currentComponent);
                   }
                 }
@@ -63,17 +63,17 @@ export const resolveCollision = currentComponent => {
                 currentComponent.GRAVITY = GRAVITY;
 
                 if (currentComponent.static) {
-                  otherComponent.setY(e => (e.y += yD));
+                  otherComponent.setY(yD);
                   resolveCollision(otherComponent);
                 } else if (otherComponent.static) {
-                  currentComponent.setY(e => (e.y -= yD));
+                  currentComponent.setY(-yD);
                   resolveCollision(currentComponent);
                 } else {
                   if (currentComponent.IS_MOVING_Y) {
-                    otherComponent.setY(e => (e.y += yD));
+                    otherComponent.setY(yD);
                     resolveCollision(otherComponent);
                   } else if (otherComponent.IS_MOVING_Y) {
-                    currentComponent.setY(e => (e.y -= yD));
+                    currentComponent.setY(-yD);
                     resolveCollision(currentComponent);
                   }
                 }
@@ -86,17 +86,17 @@ export const resolveCollision = currentComponent => {
 
               if (xD < yD) {
                 if (currentComponent.static) {
-                  otherComponent.setX(e => (e.x += xD));
+                  otherComponent.setX(xD);
                   resolveCollision(otherComponent);
                 } else if (otherComponent.static) {
-                  currentComponent.setX(e => (e.x -= xD));
+                  currentComponent.setX(-xD);
                   resolveCollision(currentComponent);
                 } else {
                   if (currentComponent.IS_MOVING_X) {
-                    otherComponent.setX(e => (e.x += xD));
+                    otherComponent.setX(xD);
                     resolveCollision(otherComponent);
                   } else if (otherComponent.IS_MOVING_X) {
-                    currentComponent.setX(e => (e.x -= xD));
+                    currentComponent.setX(-xD);
                     resolveCollision(currentComponent);
                   }
                 }
@@ -106,17 +106,17 @@ export const resolveCollision = currentComponent => {
                 otherComponent.GRAVITY = GRAVITY;
 
                 if (currentComponent.static) {
-                  otherComponent.setY(e => (e.y -= yD));
+                  otherComponent.setY(-yD);
                   resolveCollision(otherComponent);
                 } else if (otherComponent.static) {
-                  currentComponent.setY(e => (e.y += yD));
+                  currentComponent.setY(yD);
                   resolveCollision(currentComponent);
                 } else {
                   if (currentComponent.IS_MOVING_Y) {
-                    otherComponent.setY(e => (e.y -= yD));
+                    otherComponent.setY(-yD);
                     resolveCollision(otherComponent);
                   } else if (otherComponent.IS_MOVING_Y) {
-                    currentComponent.setY(e => (e.y += yD));
+                    currentComponent.setY(yD);
                     resolveCollision(currentComponent);
                   }
                 }
@@ -134,17 +134,17 @@ export const resolveCollision = currentComponent => {
 
               if (xD < yD) {
                 if (currentComponent.static) {
-                  otherComponent.setX(e => (e.x -= xD));
+                  otherComponent.setX(-xD);
                   resolveCollision(otherComponent);
                 } else if (otherComponent.static) {
-                  currentComponent.setX(e => (e.x += xD));
+                  currentComponent.setX(xD);
                   resolveCollision(currentComponent);
                 } else {
                   if (currentComponent.IS_MOVING_X) {
-                    otherComponent.setX(e => (e.x -= xD));
+                    otherComponent.setX(-xD);
                     resolveCollision(otherComponent);
                   } else if (otherComponent.IS_MOVING_X) {
-                    currentComponent.setX(e => (e.x += xD));
+                    currentComponent.setX(xD);
                     resolveCollision(currentComponent);
                   }
                 }
@@ -154,17 +154,17 @@ export const resolveCollision = currentComponent => {
                 currentComponent.GRAVITY = GRAVITY;
 
                 if (currentComponent.static) {
-                  otherComponent.setY(e => (e.y += yD));
+                  otherComponent.setY(yD);
                   resolveCollision(otherComponent);
                 } else if (otherComponent.static) {
-                  currentComponent.setY(e => (e.y -= yD));
+                  currentComponent.setY(-yD);
                   resolveCollision(currentComponent);
                 } else {
                   if (currentComponent.IS_MOVING_Y) {
-                    otherComponent.setY(e => (e.y += yD));
+                    otherComponent.setY(yD);
                     resolveCollision(otherComponent);
                   } else if (otherComponent.IS_MOVING_Y) {
-                    currentComponent.setY(e => (e.y -= yD));
+                    currentComponent.setY(-yD);
                     resolveCollision(currentComponent);
                   }
                 }
@@ -177,17 +177,17 @@ export const resolveCollision = currentComponent => {
 
               if (xD < yD) {
                 if (currentComponent.static) {
-                  otherComponent.setX(e => (e.x -= xD));
+                  otherComponent.setX(-xD);
                   resolveCollision(otherComponent);
                 } else if (otherComponent.static) {
-                  currentComponent.setX(e => (e.x += xD));
+                  currentComponent.setX(xD);
                   resolveCollision(currentComponent);
                 } else {
                   if (currentComponent.IS_MOVING_X) {
-                    otherComponent.setX(e => (e.x -= xD));
+                    otherComponent.setX(-xD);
                     resolveCollision(otherComponent);
                   } else if (otherComponent.IS_MOVING_X) {
-                    currentComponent.setX(e => (e.x += xD));
+                    currentComponent.setX(xD);
                     resolveCollision(currentComponent);
                   }
                 }
@@ -196,17 +196,17 @@ export const resolveCollision = currentComponent => {
               } else {
                 otherComponent.GRAVITY = GRAVITY;
                 if (currentComponent.static) {
-                  otherComponent.setY(e => (e.y -= yD));
+                  otherComponent.setY(-yD);
                   resolveCollision(otherComponent);
                 } else if (otherComponent.static) {
-                  currentComponent.setY(e => (e.y += yD));
+                  currentComponent.setY(yD);
                   resolveCollision(currentComponent);
                 } else {
                   if (currentComponent.IS_MOVING_Y) {
-                    otherComponent.setY(e => (e.y -= yD));
+                    otherComponent.setY(-yD);
                     resolveCollision(otherComponent);
                   } else if (otherComponent.IS_MOVING_Y) {
-                    currentComponent.setY(e => (e.y += yD));
+                    currentComponent.setY(yD);
                     resolveCollision(currentComponent);
                   }
                 }

@@ -15,7 +15,7 @@ const Boy = component({
     mass: 1,
     w: 50,
     h: 50,
-    x: 532,
+    x: 600,
     y: 338,
     facingLeft: false,
     rigidBody: true,
@@ -70,7 +70,7 @@ const Boy = component({
       ArrowUp(e, keyDown) {
         if (!keyDown) return;
         // e.animate("upAnim");
-        // e.y -= 5;
+        // e.setY(e => (e.y -= 5));
         // e.isMoving = true;
         if (!e._hasJumped) {
           e.gravity = false;
@@ -83,7 +83,7 @@ const Boy = component({
               return;
             }
             // e.y -= 8;
-            e.setY(e => (e.y -= 8));
+            e.setY(-8);
             e._jumpAmt++;
           }, 1);
           e._hasJumped = true;
@@ -92,19 +92,20 @@ const Boy = component({
       // ArrowDown(e, keyDown) {
       //   if (!keyDown) return;
       //   e.animate("downAnim");
+      //   e.setY(e => (e.y += 5));
       //   e.isMoving = true;
       // },
       ArrowLeft(e, keyDown) {
         if (!keyDown) return;
         e.animate("leftAnim");
-        e.setX(e => (e.x -= 5));
+        e.setX(-5);
         e.isMoving = true;
         e.facingLeft = true;
       },
       ArrowRight(e, keyDown) {
         if (!keyDown) return;
         e.animate("rightAnim");
-        e.setX(e => (e.x += 5));
+        e.setX(5);
         e.isMoving = true;
         e.facingLeft = false;
       },
@@ -119,8 +120,7 @@ const Boy = component({
     },
     resetJump() {
       this._jumpAmt = 1;
-    },
-    onCollision({ atTop, atBottom }) {}
+    }
   }
 });
 const shoot = () => {

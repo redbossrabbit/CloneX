@@ -9,9 +9,7 @@ export const GRAVITY = 10;
 
 const gravity = component => {
   component.setY(
-    component =>
-      (component.y += component.GRAVITY +=
-        component.GRAVITY * ((component.mass || 1) / 100))
+    (component.GRAVITY += component.GRAVITY * ((component.mass || 1) / 100))
   );
 };
 

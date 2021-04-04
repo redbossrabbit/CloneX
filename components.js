@@ -20,14 +20,14 @@ class Component {
     this.GRAVITY = GRAVITY;
     this.id = id += 1;
 
-    this.setX = fn => {
+    this.setX = val => {
       this.IS_MOVING_X = true;
-      fn(this);
+      this.x += val;
     };
 
-    this.setY = fn => {
+    this.setY = val => {
       this.IS_MOVING_Y = true;
-      fn(this);
+      this.y += val;
     };
 
     if (this.animations) {

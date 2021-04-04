@@ -48,9 +48,12 @@ block8.static = false;
 block8.gravity = true;
 block8.color = "rgb(1,0,0)";
 block8.y = 200;
-block8.x = 350;
+block8.x = 550;
 block8.w = 50;
 block8.h = 50;
+// block8.default = () => {
+//   block8.setX(-5);
+// };
 
 const block9 = Enemy();
 block9.static = false;
@@ -60,6 +63,9 @@ block9.y = 200;
 block9.x = 450;
 block9.w = 50;
 block9.h = 50;
+// block9.default = () => {
+//   block9.setX(3);
+// };
 
 const block3 = Enemy();
 block3.y = 100;
