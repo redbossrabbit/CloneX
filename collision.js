@@ -25,8 +25,11 @@ export const resolveCollision = currentComponent => {
       exceptYPos < othersYPos + othersHeight &&
       othersYPos < exceptYPos + exceptHeight
     ) {
-      let collisionData = {
+      let currCollisionData = {
         entity: otherComponent
+      };
+      let otherCollisionData = {
+        entity: currentComponent
       };
       try {
         if (
@@ -35,11 +38,13 @@ export const resolveCollision = currentComponent => {
         ) {
           if (exceptXPos < othersXPos) {
             const xD = exceptXPos + exceptWidth - othersXPos;
-            collisionData.displacementX = xD;
+            currCollisionData.displacementX = xD;
+            otherCollisionData.displacementX = xD;
 
             if (exceptYPos < othersYPos) {
               const yD = exceptYPos + exceptHeight - othersYPos;
-              collisionData.displacementY = yD;
+              currCollisionData.displacementY = yD;
+              otherCollisionData.displacementY = yD;
 
               if (xD < yD) {
                 if (currentComponent.static) {
@@ -57,7 +62,8 @@ export const resolveCollision = currentComponent => {
                     resolveCollision(currentComponent);
                   }
                 }
-                collisionData.atLeft = true;
+                currCollisionData.atLeft = true;
+                otherCollisionData.atRight = true;
                 //at left
               } else {
                 currentComponent.GRAVITY = GRAVITY;
@@ -77,12 +83,14 @@ export const resolveCollision = currentComponent => {
                     resolveCollision(currentComponent);
                   }
                 }
-                collisionData.atTop = true;
+                currCollisionData.atTop = true;
+                otherCollisionData.atBottom = true;
                 //at top
               }
             } else {
               const yD = othersYPos + othersHeight - exceptYPos;
-              collisionData.displacementY = yD;
+              currCollisionData.displacementY = yD;
+              otherCollisionData.displacementY = yD;
 
               if (xD < yD) {
                 if (currentComponent.static) {
@@ -100,7 +108,8 @@ export const resolveCollision = currentComponent => {
                     resolveCollision(currentComponent);
                   }
                 }
-                collisionData.atLeft = true;
+                currCollisionData.atLeft = true;
+                otherCollisionData.atRight = true;
                 //at left
               } else {
                 otherComponent.GRAVITY = GRAVITY;
@@ -120,17 +129,20 @@ export const resolveCollision = currentComponent => {
                     resolveCollision(currentComponent);
                   }
                 }
-                collisionData.atBottom = true;
+                currCollisionData.atBottom = true;
+                otherCollisionData.atTop = true;
                 //at bottom
               }
             }
           } else {
             const xD = othersXPos + othersWidth - exceptXPos;
-            collisionData.displacementX = xD;
+            currCollisionData.displacementX = xD;
+            otherCollisionData.displacementX = xD;
 
             if (exceptYPos < othersYPos) {
               const yD = exceptYPos + exceptHeight - othersYPos;
-              collisionData.displacementY = yD;
+              currCollisionData.displacementY = yD;
+              otherCollisionData.displacementY = yD;
 
               if (xD < yD) {
                 if (currentComponent.static) {
@@ -148,7 +160,8 @@ export const resolveCollision = currentComponent => {
                     resolveCollision(currentComponent);
                   }
                 }
-                collisionData.atRight = true;
+                currCollisionData.atRight = true;
+                otherCollisionData.atLeft = true;
                 //at right
               } else {
                 currentComponent.GRAVITY = GRAVITY;
@@ -168,12 +181,14 @@ export const resolveCollision = currentComponent => {
                     resolveCollision(currentComponent);
                   }
                 }
-                collisionData.atTop = true;
+                currCollisionData.atTop = true;
+                otherCollisionData.atBottom = true;
                 //at top
               }
             } else {
               const yD = othersYPos + othersHeight - exceptYPos;
-              collisionData.displacementY = yD;
+              currCollisionData.displacementY = yD;
+              otherCollisionData.displacementY = yD;
 
               if (xD < yD) {
                 if (currentComponent.static) {
@@ -191,7 +206,8 @@ export const resolveCollision = currentComponent => {
                     resolveCollision(currentComponent);
                   }
                 }
-                collisionData.atRight = true;
+                currCollisionData.atRight = true;
+                otherCollisionData.atLeft = true;
                 //at right
               } else {
                 otherComponent.GRAVITY = GRAVITY;
@@ -210,7 +226,8 @@ export const resolveCollision = currentComponent => {
                     resolveCollision(currentComponent);
                   }
                 }
-                collisionData.atBottom = true;
+                currCollisionData.atBottom = true;
+                otherCollisionData.atTop = true;
                 //at bottom
               }
             }
@@ -218,7 +235,10 @@ export const resolveCollision = currentComponent => {
         }
       } catch {}
       currentComponent.onCollision &&
-        currentComponent.onCollision(collisionData);
+        currentComponent.onCollision(currCollisionData);
+
+      otherComponent.onCollision &&
+        otherComponent.onCollision(otherCollisionData);
     }
   }
 };

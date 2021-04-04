@@ -70,7 +70,7 @@ const Boy = component({
       ArrowUp(e, keyDown) {
         if (!keyDown) return;
         // e.animate("upAnim");
-        // e.setY(e => (e.y -= 5));
+        // e.setY(-5);
         // e.isMoving = true;
         if (!e._hasJumped) {
           e.gravity = false;
@@ -92,7 +92,7 @@ const Boy = component({
       // ArrowDown(e, keyDown) {
       //   if (!keyDown) return;
       //   e.animate("downAnim");
-      //   e.setY(e => (e.y += 5));
+      //   e.setY(5);
       //   e.isMoving = true;
       // },
       ArrowLeft(e, keyDown) {

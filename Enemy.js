@@ -48,7 +48,7 @@ block8.static = false;
 block8.gravity = true;
 block8.color = "rgb(1,0,0)";
 block8.y = 200;
-block8.x = 550;
+block8.x = 350;
 block8.w = 50;
 block8.h = 50;
 // block8.default = () => {
