@@ -7,6 +7,7 @@ import {
 import { Camera } from "./camera";
 import { component } from "./components";
 import Bullet from "./Bullet";
+import { light } from "./light.js";
 
 const Boy = component({
   props: {
@@ -21,6 +22,10 @@ const Boy = component({
     canJump: true,
     gravity: true,
     static: false,
+    layer: 2,
+    light: {
+      lightMap: "./assets/img/light.png"
+    },
     // color: "red",
     reactsWith: {
       enemy: true
@@ -47,6 +52,7 @@ const Boy = component({
       !this.isMoving && this.animate("idle");
       this.isMoving = false;
       this.camera.track();
+      // console.log(this.IS_MOVING);
     },
     camera(e) {
       return new Camera({
@@ -56,6 +62,9 @@ const Boy = component({
         focusHeight: 120,
         focusWidth: 120
       });
+    },
+    beforeRender(e) {
+      light(e);
     },
     controls: {
       ArrowUp(e, keyDown) {
@@ -73,28 +82,29 @@ const Boy = component({
               clearTimer(id);
               return;
             }
-            e.y -= 8;
+            // e.y -= 8;
+            e.setY(e => (e.y -= 8));
             e._jumpAmt++;
           }, 1);
           e._hasJumped = true;
         }
       },
-      ArrowDown(e, keyDown) {
-        if (!keyDown) return;
-        e.animate("downAnim");
-        e.isMoving = true;
-      },
+      // ArrowDown(e, keyDown) {
+      //   if (!keyDown) return;
+      //   e.animate("downAnim");
+      //   e.isMoving = true;
+      // },
       ArrowLeft(e, keyDown) {
         if (!keyDown) return;
         e.animate("leftAnim");
-        e.x -= 5;
+        e.setX(e => (e.x -= 5));
         e.isMoving = true;
         e.facingLeft = true;
       },
       ArrowRight(e, keyDown) {
         if (!keyDown) return;
         e.animate("rightAnim");
-        e.x += 5;
+        e.setX(e => (e.x += 5));
         e.isMoving = true;
         e.facingLeft = false;
       },
@@ -108,18 +118,9 @@ const Boy = component({
       }
     },
     resetJump() {
-      this.atBottom = false;
       this._jumpAmt = 1;
-      this._hasJumped = false;
     },
-    onCollision({ atTop, atBottom }) {
-      if (atBottom) {
-        this.atBottom = true;
-      }
-      if (atTop) {
-        this.resetJump();
-      }
-    }
+    onCollision({ atTop, atBottom }) {}
   }
 });
 const shoot = () => {

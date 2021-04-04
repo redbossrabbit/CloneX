@@ -1,1 +1,0 @@
-fix two consecutive axis aligned components collision resistance

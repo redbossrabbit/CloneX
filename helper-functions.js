@@ -26,3 +26,15 @@ export const remove = component => {
   if (componentPostiton < 0) return;
   renderCommands.splice(componentPostiton, 1);
 };
+
+export const swap = (comp1, comp2) => {
+  const findCompIdx = (comp = renderCommands.find((item, idx) => {
+    if (item.id === comp.id) {
+      return idx;
+    }
+  }));
+  const id1 = findCompIdx(comp1);
+  const id2 = findCompIdx(comp2);
+  renderCommands[id1] = comp2;
+  renderCommands[id2] = comp1;
+};

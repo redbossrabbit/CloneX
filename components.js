@@ -1,6 +1,7 @@
 import { setAnimation } from "./animation.js";
-import { renderCommands, render } from "./render.js";
+import { render, renderCommands } from "./render.js";
 import { GRAVITY } from "./game-loop.js";
+import { isMoving } from "./helper-functions";
 
 export const allComponentData = {};
 
@@ -17,7 +18,17 @@ class Component {
     }
 
     this.GRAVITY = GRAVITY;
-    this.id = id++;
+    this.id = id += 1;
+
+    this.setX = fn => {
+      this.IS_MOVING_X = true;
+      fn(this);
+    };
+
+    this.setY = fn => {
+      this.IS_MOVING_Y = true;
+      fn(this);
+    };
 
     if (this.animations) {
       setAnimation(this);
@@ -27,10 +38,19 @@ class Component {
       this.camera = this.camera(this);
     }
 
-    allComponentData[this.id] = this;
-
     this.render = () => render(this);
+
+    if (this.beforeRender) {
+      renderCommands.push(() => this.beforeRender(this));
+    }
+
     renderCommands.push(this.render);
+
+    if (this.afterRender) {
+      renderCommands.push(() => this.afterRender(this));
+    }
+
+    allComponentData[this.id] = this;
   }
 }
 

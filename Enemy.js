@@ -1,13 +1,13 @@
 import { component } from "./components";
-
 const Enemy = () =>
   component({
     props: {
       name: "enemy",
       mass: 1,
-      color: "black",
+      color: "rgb(5,10,0)",
       static: true,
       gravity: false,
+      layer: 1,
       bounds: {},
       _isHit: false,
       reactsWith: {
@@ -23,8 +23,14 @@ const Enemy = () =>
         this.color = this.isHit ? "red" : this.color;
         this._isHit = false;
       },
-      onCollision({ atBottom, entity }) {
+      onCollision({ atTop, atBottom, entity }) {
+        if (atTop && entity.name === "boy") {
+          entity.atBottom = true;
+          entity.resetJump();
+        }
         if (atBottom && entity.name === "boy") {
+          entity._hasJumped = false;
+          entity.atBottom = false;
           entity.resetJump();
         }
       }
@@ -40,7 +46,7 @@ block4.h = 50;
 const block8 = Enemy();
 block8.static = false;
 block8.gravity = true;
-block8.color = "brown";
+block8.color = "rgb(1,0,0)";
 block8.y = 200;
 block8.x = 350;
 block8.w = 50;
@@ -49,7 +55,7 @@ block8.h = 50;
 const block9 = Enemy();
 block9.static = false;
 block9.gravity = true;
-block9.color = "brown";
+block9.color = "rgb(1,0,0)";
 block9.y = 200;
 block9.x = 450;
 block9.w = 50;
@@ -69,7 +75,6 @@ blockd.h = 50;
 
 const block6 = Enemy();
 block6.name = "ground";
-block6.color = "black";
 block6.y = 550;
 block6.x = 0;
 block6.w = 1000;
@@ -77,7 +82,6 @@ block6.h = 50;
 
 const nextGround = Enemy();
 nextGround.name = "ground";
-nextGround.color = "black";
 nextGround.y = 400;
 nextGround.x = 1100;
 nextGround.w = 1000;

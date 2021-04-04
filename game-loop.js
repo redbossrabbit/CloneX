@@ -8,8 +8,11 @@ const wasCLicked = {};
 export const GRAVITY = 10;
 
 const gravity = component => {
-  component.y += component.GRAVITY +=
-    component.GRAVITY * ((component.mass || 1) / 100);
+  component.setY(
+    component =>
+      (component.y += component.GRAVITY +=
+        component.GRAVITY * ((component.mass || 1) / 100))
+  );
 };
 
 const img = document.createElement("img");
@@ -43,13 +46,16 @@ const InitScene = (xcor, ycor, width, height, obj) => {
     // ctx.fillStyle = "purple";
     // ctx.fillRect(500, 300, 120, 120);
 
-    ctx.drawImage(img, 0, 0, width, 2000);
+    ctx.globalCompositeOperation = "source-over";
+    // ctx.drawImage(img, 0, 0, width, 2000);
 
     const all = Object.keys(allComponentData);
 
     /**@initialize get defaults for all components */
     all.forEach(component => {
       const currentComponent = allComponentData[component];
+      currentComponent.IS_MOVING_X = false;
+      currentComponent.IS_MOVING_Y = false;
 
       currentComponent.default && currentComponent.default();
       currentComponent.gravity && gravity(currentComponent);
