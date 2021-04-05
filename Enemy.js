@@ -1,6 +1,7 @@
 import { component } from "./components";
-import { swap } from "./helper-functions";
+import { placeInFront } from "./helper-functions";
 import Boy from "./Boy";
+
 const Enemy = () =>
   component({
     props: {
@@ -14,9 +15,7 @@ const Enemy = () =>
       _isHit: false,
       reactsWith: {
         enemy: true,
-        boy: true,
-        ground: true,
-        block: true
+        boy: true
       },
       rigidBody: true
     },
@@ -82,14 +81,12 @@ blockd.w = 200;
 blockd.h = 50;
 
 const block6 = Enemy();
-block6.name = "ground";
 block6.y = 550;
 block6.x = 0;
 block6.w = 1000;
 block6.h = 50;
 
 const nextGround = Enemy();
-nextGround.name = "ground";
 nextGround.y = 400;
 nextGround.x = 1100;
 nextGround.w = 1000;
@@ -110,5 +107,6 @@ block7.x = 700;
 block7.w = 200;
 block7.h = 400;
 
-swap(Boy, block7);
+placeInFront(Boy, block7);
+
 export default Enemy;

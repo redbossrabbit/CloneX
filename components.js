@@ -46,25 +46,23 @@ class Component {
           () => this.afterRender(this)
         ].forEach(item => item());
       };
-      renderCommands.push(this.render);
     } else if (this.beforeRender) {
       this.render = () => {
         [() => this.beforeRender(this), () => render(this)].forEach(item =>
           item()
         );
       };
-      renderCommands.push(this.render);
     } else if (this.afterRender) {
       this.render = () => {
         [() => render(this), () => this.afterRender(this)].forEach(item =>
           item()
         );
       };
-      renderCommands.push(this.render);
     } else {
       this.render = () => render(this);
-      renderCommands.push(this.render);
     }
+
+    renderCommands.push(this.render);
 
     allComponentData[this.id] = this;
   }

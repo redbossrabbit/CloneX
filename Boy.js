@@ -24,7 +24,12 @@ const Boy = component({
     static: false,
     layer: 2,
     light: {
-      lightMap: "./assets/img/light.png"
+      lightMap: "./assets/img/light.png",
+      blendMode: "color-dodge",
+      x: 300,
+      y: 100,
+      w: 500,
+      h: 500
     },
     // color: "red",
     reactsWith: {
@@ -52,7 +57,6 @@ const Boy = component({
       !this.isMoving && this.animate("idle");
       this.isMoving = false;
       this.camera.track();
-      // console.log(this.IS_MOVING);
     },
     camera(e) {
       return new Camera({

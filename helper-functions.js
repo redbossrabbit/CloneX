@@ -1,5 +1,5 @@
 import { allComponentData } from "./components.js";
-import { renderCommands } from "./render.js";
+import { renderCommands, setRenderCommands } from "./render.js";
 
 let id = 0;
 
@@ -28,12 +28,22 @@ export const remove = component => {
   renderCommands.splice(componentPostiton, 1);
 };
 
-export const swap = (comp1, comp2) => {
-  const findCompIdx = comp => renderCommands.indexOf(comp.render);
+export let placeCommands = [];
 
-  const id2 = findCompIdx(comp2);
-  const id1 = findCompIdx(comp1);
+export const resetPlaceCommands = () => {
+  placeCommands = [];
+};
 
-  renderCommands[id1] = comp2.render;
-  renderCommands[id2] = comp1.render;
+export const placeInFront = (comp1, comp2) => {
+  placeCommands.push(() => {
+    const findCompIdx = comp => renderCommands.indexOf(comp.render);
+
+    const id2 = findCompIdx(comp2);
+    const id1 = findCompIdx(comp1);
+
+    const comp1Render = renderCommands.splice(id1, 1)[0];
+    const part = renderCommands.splice(id2);
+    renderCommands.push(comp1Render);
+    setRenderCommands([...renderCommands, ...part]);
+  });
 };

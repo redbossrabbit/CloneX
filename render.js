@@ -1,4 +1,7 @@
-export const renderCommands = [];
+export let renderCommands = [];
+export const setRenderCommands = val => {
+  renderCommands = [...val];
+};
 export const scene = document.createElement("canvas");
 document.body.append(scene);
 export const ctx = scene.getContext("2d");

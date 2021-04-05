@@ -1,7 +1,11 @@
 import { allComponentData } from "./components.js";
 import { renderCommands, ctx, scene } from "./render.js";
 import { resolveCollision } from "./collision.js";
-import { loopCommands } from "./helper-functions.js";
+import {
+  loopCommands,
+  placeCommands,
+  resetPlaceCommands
+} from "./helper-functions.js";
 
 const keyboardVals = {};
 const wasCLicked = {};
@@ -12,10 +16,6 @@ const gravity = component => {
     (component.GRAVITY += component.GRAVITY * ((component.mass || 1) / 100))
   );
 };
-
-const img = document.createElement("img");
-
-img.setAttribute("src", "./assets/img/bg.jpg");
 
 const InitScene = (xcor, ycor, width, height, obj) => {
   scene.width = width;
@@ -41,11 +41,8 @@ const InitScene = (xcor, ycor, width, height, obj) => {
     ctx.clearRect(xcor, ycor, obj.w || width, obj.h || height);
     ctx.fillStyle = obj.color;
     ctx.fillRect(xcor, ycor, width, height);
-    // ctx.fillStyle = "purple";
-    // ctx.fillRect(500, 300, 120, 120);
 
     ctx.globalCompositeOperation = "source-over";
-    // ctx.drawImage(img, 0, 0, width, 2000);
 
     const all = Object.keys(allComponentData);
 
@@ -102,6 +99,8 @@ const InitScene = (xcor, ycor, width, height, obj) => {
         }
       }
     });
+    placeCommands.forEach(command => command());
+    resetPlaceCommands();
     requestAnimationFrame(gameLoop);
   };
   gameLoop();
