@@ -38,16 +38,32 @@ class Component {
       this.camera = this.camera(this);
     }
 
-    this.render = () => render(this);
-
-    if (this.beforeRender) {
-      renderCommands.push(() => this.beforeRender(this));
-    }
-
-    renderCommands.push(this.render);
-
-    if (this.afterRender) {
-      renderCommands.push(() => this.afterRender(this));
+    if (this.beforeRender && this.afterRender) {
+      this.render = () => {
+        [
+          () => this.beforeRender(this),
+          () => render(this),
+          () => this.afterRender(this)
+        ].forEach(item => item());
+      };
+      renderCommands.push(this.render);
+    } else if (this.beforeRender) {
+      this.render = () => {
+        [() => this.beforeRender(this), () => render(this)].forEach(item =>
+          item()
+        );
+      };
+      renderCommands.push(this.render);
+    } else if (this.afterRender) {
+      this.render = () => {
+        [() => render(this), () => this.afterRender(this)].forEach(item =>
+          item()
+        );
+      };
+      renderCommands.push(this.render);
+    } else {
+      this.render = () => render(this);
+      renderCommands.push(this.render);
     }
 
     allComponentData[this.id] = this;

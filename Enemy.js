@@ -1,5 +1,6 @@
 import { component } from "./components";
 import { swap } from "./helper-functions";
+import Boy from "./Boy";
 const Enemy = () =>
   component({
     props: {
@@ -109,5 +110,5 @@ block7.x = 700;
 block7.w = 200;
 block7.h = 400;
 
-// swap(Boy, block7);
+swap(Boy, block7);
 export default Enemy;
