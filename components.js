@@ -1,7 +1,6 @@
 import { setAnimation } from "./animation.js";
 import { render, renderCommands } from "./render.js";
 import { GRAVITY } from "./game-loop.js";
-import { isMoving } from "./helper-functions";
 
 export const allComponentData = {};
 
