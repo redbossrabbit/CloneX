@@ -127,3 +127,5 @@ const shoot = () => {
   Bullet(Boy).facingLeft = Boy.facingLeft;
   Boy._hasShot = false;
 };
+
+export default Boy;
