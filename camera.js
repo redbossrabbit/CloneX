@@ -1,4 +1,5 @@
 import { allComponentData } from "./components";
+import { ctx } from "./render";
 
 const observe = (obj, key) => {
   let val = obj[key];
@@ -12,8 +13,9 @@ const observe = (obj, key) => {
     }
   });
 };
+
 export class Camera {
-  constructor({ focus, focusX, focusY, focusWidth, focusHeight }) {
+  constructor({ focus, focusX, focusY, focusWidth, focusHeight, view, shake }) {
     observe(focus, "x");
     observe(focus, "y");
 
@@ -45,7 +47,12 @@ export class Camera {
           item.y += Math.abs(focus._PREVIOUS_VALUE_y - focus.y);
         });
       }
+      if (view) {
+        ctx.strokeStyle = "purple";
+        ctx.strokeRect(focusX, focusY, focusWidth, focusHeight);
+      }
     };
+
     return this;
   }
 }

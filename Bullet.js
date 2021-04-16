@@ -1,35 +1,51 @@
-import { component } from "./components";
+import GameBox from "./components";
 import { remove, timeout, newTimingFunction } from "./helper-functions";
+import { block8 } from "./Enemy";
+import boy from "./Boy";
 
 const Bullet = e => {
-  const bullet = component({
-    props: {
-      name: "bullet",
-      color: "green",
-      x: !e.facingLeft ? e.x + e.w : e.x - 20,
-      y: e.y,
-      w: 20,
-      h: 20,
-      layer: 2,
-      facingLeft: e.facingLeft,
-      reactsWith: {
+  class Bullet extends GameBox.Component {
+    constructor() {
+      super();
+      this.name = "bullet";
+      this.color = e.name === "boy" ? "yellow" : "green";
+      this.x = !e._facingLeft ? e.x + e.w : e.x - 20;
+      this.y = e.y;
+      this.w = 20;
+      this.h = 20;
+      this.layer = 2;
+      this.facingLeft = e.facingLeft;
+      this.reactsWith = {
         block: true
-      }
-    },
-    states: {
-      default() {
-        !this.facingLeft ? (this.x += 10) : (this.x -= 10);
-      },
-      onCollision() {
-        remove(this);
+      };
+      this.rate = 10;
+    }
+    update() {
+      if (!e._facingLeft) {
+        this.x += this.rate += 2;
+      } else {
+        this.x -= this.rate += 2;
       }
     }
-  });
+    onCollision({ entity }) {
+      entity.name !== "detector" && remove(this);
+      if (entity.name === "block8") {
+        if (boy.x < block8.x) {
+          block8.setX(50);
+        } else if (boy.x > block8.x) {
+          block8.setX(-50);
+        }
+      }
+    }
+  }
+  const _Bullet = new Bullet().init();
+
   newTimingFunction();
   timeout(() => {
-    remove(bullet);
+    remove(_Bullet);
   }, 60);
-  return bullet;
+
+  return _Bullet;
 };
 
 export default Bullet;

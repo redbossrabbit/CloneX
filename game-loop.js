@@ -46,14 +46,18 @@ const InitScene = (xcor, ycor, width, height, obj) => {
 
     const all = Object.keys(allComponentData);
 
+    placeCommands.forEach(command => command());
+    resetPlaceCommands();
+
     /**@initialize get defaults for all components */
     all.forEach(component => {
       const currentComponent = allComponentData[component];
+
       currentComponent.IS_MOVING_X = false;
       currentComponent.IS_MOVING_Y = false;
 
-      currentComponent.default && currentComponent.default();
       currentComponent.gravity && gravity(currentComponent);
+      currentComponent.update && currentComponent.update();
 
       if (currentComponent.controls) {
         Object.keys(currentComponent.controls).forEach(e => {
@@ -80,6 +84,7 @@ const InitScene = (xcor, ycor, width, height, obj) => {
       renderCommands[i]();
     }
 
+    /**@timingFunctions resolves timing functions */
     Object.values(loopCommands).forEach(command => {
       command[1]++;
       if (command[1] === command[2]) {
@@ -99,8 +104,6 @@ const InitScene = (xcor, ycor, width, height, obj) => {
         }
       }
     });
-    placeCommands.forEach(command => command());
-    resetPlaceCommands();
     requestAnimationFrame(gameLoop);
   };
   gameLoop();

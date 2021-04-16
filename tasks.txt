@@ -1,0 +1,11 @@
+-chunk system
+-world bounds
+-collision bounds
+-switch scenes
+-put all tools in one object
+-camera shake
+-camera zoom
+-scroll parallax
+-rotations
+-polygons
+-advanced physics
