@@ -8,7 +8,6 @@ class Detector extends GameBox.Component {
     // this.color = "green";
     this.w = 450;
     this.h = 50;
-    this.layer = 2;
   }
   update() {
     this.y = block8.y;

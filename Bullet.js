@@ -13,7 +13,6 @@ const Bullet = e => {
       this.y = e.y;
       this.w = 20;
       this.h = 20;
-      this.layer = 2;
       this.facingLeft = e.facingLeft;
       this.reactsWith = {
         block: true
