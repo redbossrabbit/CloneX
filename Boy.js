@@ -5,8 +5,9 @@ import {
   clearTimer
 } from "./helper-functions.js";
 import { Camera } from "./camera";
-import GameBox from "./components";
+import GameBox from "./gameBox";
 import Bullet from "./Bullet";
+// import boy_light from "./Boy-Light";
 
 class Boy extends GameBox.Component {
   constructor() {
@@ -23,14 +24,6 @@ class Boy extends GameBox.Component {
     this.gravity = true;
     this.static = false;
     this.layer = 2;
-    this.light = {
-      lightMap: "./assets/img/light.png",
-      blendMode: "color-dodge",
-      x: 300,
-      y: 100,
-      w: 500,
-      h: 500
-    };
     // this.color: "red",
     this.reactsWith = {
       enemy: true
@@ -38,25 +31,41 @@ class Boy extends GameBox.Component {
     this._jumpAmt = 1;
     this.animations = {
       spriteSheet: "./assets/img/sprite-sheet.png",
-      imageSizeX: 50,
-      imageSizeY: 50,
       speed: 10,
-      frameWidth: 400,
-      frameHeight: 450,
 
       //animations
-      downAnim: [0, 0, 4],
-      rightAnim: [3, 0, 4],
-      leftAnim: [2, 0, 4],
-      upAnim: [1, 0, 4],
-      idle: [0, 0, 1]
+      downAnim: [
+        [0, 0, 400, 450, 50, 50],
+        [400, 0, 400, 450, 50, 50],
+        [400 * 2, 0, 400, 450, 50, 50],
+        [400 * 3, 0, 400, 450, 50, 50]
+      ],
+      rightAnim: [
+        [0, 450 * 3, 400, 450, 50, 50],
+        [400, 450 * 3, 400, 450, 50, 50],
+        [400 * 2, 450 * 3, 400, 450, 50, 50],
+        [400 * 3, 450 * 3, 400, 450, 50, 50]
+      ],
+      leftAnim: [
+        [0, 450 * 2, 400, 450, 50, 50],
+        [400, 450 * 2, 400, 450, 50, 50],
+        [400 * 2, 450 * 2, 400, 450, 50, 50],
+        [400 * 3, 450 * 2, 400, 450, 50, 50]
+      ],
+      upAnim: [
+        [0, 450, 400, 450, 50, 50],
+        [400, 450, 400, 450, 50, 50],
+        [400 * 2, 450, 400, 450, 50, 50],
+        [400 * 3, 450, 400, 450, 50, 50]
+      ],
+      idle: [[0, 0, 400, 450, 50, 50]]
     };
     this.controls = {
       ArrowUp(_this, keyDown) {
-        if (!keyDown) return;
-        // this.animate("upAnim");
-        // this.setY(-5);
-        // this.isMoving = true;
+        // if (!keyDown) return;
+        // _this.animate("upAnim");
+        // _this.setY(-5);
+        // _this.isMoving = true;
         if (!_this._hasJumped) {
           _this.gravity = false;
           const id = newTimingFunction();
@@ -73,11 +82,11 @@ class Boy extends GameBox.Component {
           _this._hasJumped = true;
         }
       },
-      // ArrowDown(this, keyDown) {
+      // ArrowDown(_this, keyDown) {
       //   if (!keyDown) return;
-      //   this.animate("downAnim");
-      //   this.setY(5);
-      //   this.isMoving = true;
+      //   _this.animate("downAnim");
+      //   _this.setY(5);
+      //   _this.isMoving = true;
       // },
       ArrowLeft(_this, keyDown) {
         if (!keyDown) return;
@@ -107,6 +116,8 @@ class Boy extends GameBox.Component {
     !this._isMoving && this.animate("idle");
     this._isMoving = false;
     this.camera.track();
+    // boy_light.x = this.x - 225;
+    // boy_light.y = this.y - 230;
   }
   camera() {
     return new Camera({
@@ -117,9 +128,6 @@ class Boy extends GameBox.Component {
       focusWidth: 120
       // view: true
     });
-  }
-  beforeRender() {
-    this.setLight();
   }
   _resetJump() {
     this._jumpAmt = 1;

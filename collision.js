@@ -1,5 +1,5 @@
-import { allComponentData } from "./components.js";
-import { GRAVITY } from "./game-loop.js";
+import { allComponentData } from "./component.js";
+import { GRAVITY } from "./engine.js";
 
 export const resolveCollision = currentComponent => {
   if (!currentComponent) return;
@@ -232,13 +232,13 @@ export const resolveCollision = currentComponent => {
               }
             }
           }
+          currentComponent.onCollision &&
+            currentComponent.onCollision(currCollisionData);
+
+          otherComponent.onCollision &&
+            otherComponent.onCollision(otherCollisionData);
         }
       } catch {}
-      currentComponent.onCollision &&
-        currentComponent.onCollision(currCollisionData);
-
-      otherComponent.onCollision &&
-        otherComponent.onCollision(otherCollisionData);
     }
   }
 };

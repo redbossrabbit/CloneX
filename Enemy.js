@@ -1,35 +1,34 @@
-import GameBox, { component } from "./components";
+import GameBox from "./gameBox";
 import {
-  placeInFront,
   timeout,
   newTimingFunction,
   interval,
   clearTimer
 } from "./helper-functions";
-import Boy from "./Boy";
 
 class Enemy extends GameBox.Component {
   constructor() {
     super();
     this.name = "enemy";
     this.mass = 1;
-    this.color = "rgb(5,10,0)";
+    this.color = "rgb(50,100,100)";
     this.static = true;
     this.gravity = false;
     this.layer = 1;
     this._isHit = false;
     this.reactsWith = {
       enemy: true,
-      boy: true
+      boy: true,
+      ground: true
     };
     this.rigidBody = true;
   }
   update() {
     if (!this.static) {
-      this.color = this._isHit ? "white" : "rgb(1,0,0)";
+      this.color = this._isHit ? "white" : "red";
       this._isHit = false;
     } else {
-      this.color = this._isHit ? "white" : "rgb(5,10,0)";
+      this.color = this._isHit ? "white" : "rgb(50,50,50)";
       this._isHit = false;
     }
   }
@@ -111,6 +110,7 @@ block6.y = 550;
 block6.x = 0;
 block6.w = 1000;
 block6.h = 50;
+block6.name = "ground";
 
 const nextGround = createEnemy();
 nextGround.y = 400;
@@ -132,7 +132,5 @@ block7.y = 150;
 block7.x = 700;
 block7.w = 200;
 block7.h = 400;
-
-placeInFront(Boy, block7);
 
 export default Enemy;

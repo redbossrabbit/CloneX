@@ -12,6 +12,20 @@ export const render = component => {
     ctx.fillRect(component.x, component.y, component.w, component.h);
   }
 
+  if (component.image) {
+    const imagePath = component.image;
+    const image = document.createElement("img");
+    image.setAttribute("src", imagePath);
+    const { x, y, w, h, blendMode } = component;
+    if (blendMode) {
+      ctx.globalCompositeOperation = blendMode;
+      ctx.drawImage(image, x, y, w, h);
+      ctx.globalCompositeOperation = "normal";
+    } else {
+      ctx.drawImage(image, x, y, w, h);
+    }
+  }
+
   if (component.animations) {
     ctx.drawImage(
       component.animations.spriteSheet,

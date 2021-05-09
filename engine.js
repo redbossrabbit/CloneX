@@ -1,4 +1,4 @@
-import { allComponentData } from "./components.js";
+import { allComponentData } from "./component.js";
 import { renderCommands, ctx, scene } from "./render.js";
 import { resolveCollision } from "./collision.js";
 import {
@@ -41,8 +41,6 @@ const InitScene = (xcor, ycor, width, height, obj) => {
     ctx.clearRect(xcor, ycor, obj.w || width, obj.h || height);
     ctx.fillStyle = obj.color;
     ctx.fillRect(xcor, ycor, width, height);
-
-    ctx.globalCompositeOperation = "source-over";
 
     const all = Object.keys(allComponentData);
 

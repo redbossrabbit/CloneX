@@ -1,21 +1,30 @@
-import GameBox from "./components";
+import GameBox from "./gameBox.js";
 import { remove, timeout, newTimingFunction } from "./helper-functions";
 import { block8 } from "./Enemy";
 import boy from "./Boy";
+
+const shakeWorld = () => {
+  boy.camera.shake = true;
+  newTimingFunction();
+  timeout(() => {
+    boy.camera.shake = false;
+  }, 5);
+};
 
 const Bullet = e => {
   class Bullet extends GameBox.Component {
     constructor() {
       super();
       this.name = "bullet";
-      this.color = e.name === "boy" ? "yellow" : "green";
+      this.color = e.name === "boy" ? "white" : "green";
       this.x = !e._facingLeft ? e.x + e.w : e.x - 20;
       this.y = e.y;
-      this.w = 20;
-      this.h = 20;
+      this.w = 40;
+      this.h = 40;
       this.facingLeft = e.facingLeft;
       this.reactsWith = {
-        block: true
+        enemy: true,
+        block8: true
       };
       this.rate = 10;
     }
@@ -27,6 +36,7 @@ const Bullet = e => {
       }
     }
     onCollision({ entity }) {
+      shakeWorld();
       entity.name !== "detector" && remove(this);
       if (entity.name === "block8") {
         if (boy.x < block8.x) {
@@ -37,6 +47,7 @@ const Bullet = e => {
       }
     }
   }
+
   const _Bullet = new Bullet().init();
 
   newTimingFunction();

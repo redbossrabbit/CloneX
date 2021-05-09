@@ -1,4 +1,4 @@
-import { allComponentData } from "./components.js";
+import { allComponentData } from "./component.js";
 import { renderCommands, setRenderCommands } from "./render.js";
 
 let id = 0;
@@ -46,4 +46,7 @@ export const placeInFront = (comp1, comp2) => {
     renderCommands.push(comp1Render);
     setRenderCommands([...renderCommands, ...part]);
   });
+};
+export const getRandom = (min, max) => {
+  return Math.floor(Math.random() * (max - min) + min);
 };

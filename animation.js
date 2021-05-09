@@ -1,6 +1,4 @@
 export const setAnimation = component => {
-  component.frame = 1;
-  component.updateTime = 0;
   component.animData = {
     anim: {}
   };
@@ -14,24 +12,36 @@ export const setAnimation = component => {
    * @method play - the animation player
    */
   component.play = () => {
-    const { animData, animations } = component;
+    const { animations, frame, currentAnimName } = component;
 
-    const { speed, frameWidth, frameHeight } = animations;
-
-    const { limit, xOrigin, yOrigin, animationOptions } = animData;
+    const {
+      speed,
+      [currentAnimName]: [[x, y, w, h, ix, iy]],
+      [currentAnimName]: currentAnimFrame
+    } = animations;
 
     if (component.updateTime === speed) {
       //counts gameloops before going to next frame of animation
+
       component.updateTime = 0;
-      if (component.frame === limit) {
-        if (!animationOptions.loop) {
-          component.animations.y = frameHeight * yOrigin;
-          component.animations.x = xOrigin;
-        }
-        component.frame = 0;
+
+      if (frame === component.animations[currentAnimName].length) {
+        component.frame = 1;
+        component.animations.x = x;
+        component.animations.y = y;
+        component.animations.frameWidth = w;
+        component.animations.frameHeight = h;
+        component.animations.imageSizeX = ix;
+        component.animations.imageSizeY = iy;
+        return;
       }
-      component.animations.x = (component.frame + xOrigin) * frameWidth;
-      component.frame++;
+      component.animations.x = currentAnimFrame[frame][0];
+      component.animations.frameWidth = currentAnimFrame[frame][2];
+      component.animations.frameHeight = currentAnimFrame[frame][3];
+      component.animations.imageSizeX = currentAnimFrame[frame][4];
+      component.animations.imageSizeY = currentAnimFrame[frame][5];
+
+      component.frame += 1;
     }
     component.updateTime++;
   };
@@ -40,25 +50,21 @@ export const setAnimation = component => {
    * @method animate - sets the animation data in the animData object for the animation player to work with
    */
   component.animate = animName => {
-    const { animations } = component;
-
-    const { [animName]: animVar, frameWidth, frameHeight } = animations;
-
-    const [xcor, ycor, frameAmt, options] = animVar;
-
+    const [x, y, w, h, ix, iy] = component.animations[animName][0];
     if (!component.animData.anim[animName]) {
       component.animData.anim[animName] = true;
+
+      component.currentAnimName = animName;
       component.frame = 1;
       component.updateTime = 0;
 
-      component.animData.yOrigin = xcor;
-      component.animData.xOrigin = ycor;
-      component.animData.limit = frameAmt;
-      component.animData.animationOptions = {
-        ...options
-      };
-      component.animations.y = frameHeight * xcor;
-      component.animations.x = frameWidth * ycor;
+      //initiate starting coords for renderer
+      component.animations.y = y;
+      component.animations.x = x;
+      component.animations.frameWidth = w;
+      component.animations.frameHeight = h;
+      component.animations.imageSizeX = ix;
+      component.animations.imageSizeY = iy;
     }
   };
 };

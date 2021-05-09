@@ -1,6 +1,6 @@
 import { setAnimation } from "./animation.js";
 import { render, renderCommands } from "./render.js";
-import { GRAVITY } from "./game-loop.js";
+import { GRAVITY } from "./engine.js";
 import { light as setLight } from "./light.js";
 
 export const allComponentData = {};
@@ -21,6 +21,7 @@ class Component {
       this.IS_MOVING_Y = true;
       this.y += val;
     };
+    this.depth = 1;
   }
   init() {
     if (this.animations) {
@@ -61,8 +62,4 @@ class Component {
     setLight(this);
   }
 }
-export const GameBox = {
-  Component
-};
-export const component = obj => new Component(obj);
-export default GameBox;
+export default Component;
